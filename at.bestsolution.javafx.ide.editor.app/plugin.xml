@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            thread="main">
+         <run
+               class="at.bestsolution.javafx.ide.editor.app.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="at.bestsolution.javafx.ide.editor.app.application"
+            name="JavaFX Editor">
+         <property
+               name="appName" value="JavaFX Editor">
+         </property>
+      </product>
+   </extension>
+
+</plugin>
