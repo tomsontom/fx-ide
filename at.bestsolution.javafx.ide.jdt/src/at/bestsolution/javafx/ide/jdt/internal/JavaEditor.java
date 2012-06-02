@@ -18,6 +18,8 @@ public class JavaEditor {
 	@Inject
 	public JavaEditor(BorderPane pane, IEditorInput input) {
 		SourceEditor editor = new SourceEditor();
+		pane.setCenter(editor);
+		
 		editor.setDocument(createDocument(input));
 	}
 	

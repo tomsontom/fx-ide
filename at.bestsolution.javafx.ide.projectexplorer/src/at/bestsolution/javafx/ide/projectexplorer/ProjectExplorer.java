@@ -19,13 +19,19 @@ import javafx.util.Callback;
 import javax.inject.Inject;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 
+import at.bestsolution.javafx.ide.services.IResourceFileInput;
+import at.bestsolution.javafx.ide.services.IWorkbench;
+
+@SuppressWarnings("restriction")
 public class ProjectExplorer {
 	private IResourceChangeListener listener = new IResourceChangeListener() {
 
@@ -37,6 +43,12 @@ public class ProjectExplorer {
 	};
 	
 	private TreeView<IResource> view;
+	
+	@Inject
+	IEclipseContext context;
+	
+	@Inject
+	IWorkbench workbench;
 	
 	@Inject
 	public ProjectExplorer(BorderPane container, IWorkspace workspace) {
@@ -75,13 +87,33 @@ public class ProjectExplorer {
 			@Override
 			public void handle(MouseEvent event) {
 				if( event.getClickCount() == 2 ) {
-					System.err.println("Opening file");
+					TreeItem<IResource> item = view.getSelectionModel().getSelectedItem();
+					if( item != null && item.getValue() instanceof IFile ) {
+						workbench.openEditor(new FileInput((IFile) item.getValue()));
+					}
 				}
 			}
 		});
 		container.setCenter(view);
 		
 		workspace.addResourceChangeListener(listener);
+	}
+	
+	void openEditor() {
+		
+	}
+	
+	static class FileInput implements IResourceFileInput {
+		private IFile f;
+		
+		public FileInput(IFile f) {
+			this.f = f;
+		}
+		
+		@Override
+		public IFile getFile() {
+			return f;
+		}
 	}
 	
 	static class LazyTreeItem extends TreeItem<IResource> {

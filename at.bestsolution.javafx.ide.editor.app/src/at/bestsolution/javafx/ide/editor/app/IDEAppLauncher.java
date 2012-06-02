@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
@@ -25,26 +26,48 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import at.bestsolution.javafx.ide.dialog.Dialog;
 import at.bestsolution.javafx.ide.projectexplorer.ProjectExplorer;
+import at.bestsolution.javafx.ide.services.IEditorInput;
+import at.bestsolution.javafx.ide.services.IEditorService;
 import at.bestsolution.javafx.ide.services.IProjectService;
+import at.bestsolution.javafx.ide.services.IResourceFileInput;
 import at.bestsolution.javafx.ide.services.IResourceService;
+import at.bestsolution.javafx.ide.services.IWorkbench;
 
-public class IDEAppLauncher {
+@SuppressWarnings("restriction")
+public class IDEAppLauncher implements IWorkbench {
 	private ProjectExplorer explorer;
 	private TabPane editorArea;
 	private Stage stage;
 	
+	@Inject
+	IEclipseContext rootContext;
+	
+	void initContext() {
+		rootContext.set(IWorkspace.class, ResourcesPlugin.getWorkspace());
+		rootContext.set(IWorkbench.class, this);
+	}
+	
 	@PostConstruct
 	void run(Stage primaryStage) {
+		initContext();
+		
 		stage = primaryStage;
 		BorderPane p = new BorderPane();
 		p.setTop(createToolbar());
@@ -196,13 +219,45 @@ public class IDEAppLauncher {
 	}
 	
 	private Node createProjectExplorer() {
+		IEclipseContext context = rootContext.createChild("ProjectExplorer");
 		BorderPane p = new BorderPane();
-		explorer = new ProjectExplorer(p, ResourcesPlugin.getWorkspace());
+		context.set(BorderPane.class, p);
+		
+		explorer = ContextInjectionFactory.make(ProjectExplorer.class, context);
 		return p;
 	}
 	
 	private Node createEditorArea() {
 		editorArea = new TabPane();
 		return editorArea;
+	}
+
+	@Override
+	public void openEditor(IEditorInput editorInput) {
+		try {
+			Bundle b = FrameworkUtil.getBundle(ProjectExplorer.class);
+			BundleContext context = b.getBundleContext();
+			Collection<ServiceReference<IEditorService>> refs = context.getServiceReferences(IEditorService.class, null);
+			for( ServiceReference<IEditorService> r : refs ) {
+				IEditorService es = context.getService(r);
+				if( es.handlesInput(editorInput) ) {
+					IEclipseContext editorContext = rootContext.createChild("EditorContext");
+					BorderPane container = new BorderPane();
+					Tab t = new Tab();
+					t.setText(es.getTitle(editorInput));
+					t.setContent(container);
+					
+					editorContext.set(BorderPane.class, container);
+					editorContext.set(IEditorInput.class, editorInput);
+					
+					Object o = ContextInjectionFactory.make(es.getEditorClass(), editorContext);
+					
+					editorArea.getTabs().add(t);
+				}
+			}
+		} catch (InvalidSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 }

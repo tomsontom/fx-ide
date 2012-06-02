@@ -19,8 +19,18 @@ public class JavaEditorService implements IEditorService {
 	@Override
 	public boolean handlesInput(IEditorInput input) {
 		if (input instanceof IResourceFileInput) {
-			return true;
+			IResourceFileInput fs = (IResourceFileInput) input;
+			return "java".equals(fs.getFile().getFileExtension());
 		}
 		return false;
+	}
+
+	@Override
+	public String getTitle(IEditorInput input) {
+		if (input instanceof IResourceFileInput) {
+			IResourceFileInput fs = (IResourceFileInput) input;
+			return fs.getFile().getName();
+		}
+		return "Java Editor";
 	}
 }
