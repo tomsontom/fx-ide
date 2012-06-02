@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Editor
 Bundle-SymbolicName: at.bestsolution.javafx.ide.editor
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javafx.animation;version="2.0.0",
  javafx.application;version="2.0.0",
  javafx.beans;version="2.0.0",
@@ -31,6 +31,7 @@ Import-Package: javafx.animation;version="2.0.0",
  javafx.scene.transform;version="2.0.0",
  javafx.scene.web;version="2.0.0",
  javafx.stage;version="2.0.0",
- javafx.util;version="2.0.0"
+ javafx.util;version="2.0.0",
+ netscape.javascript;version="2.0.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: at.bestsolution.javafx.ide.editor

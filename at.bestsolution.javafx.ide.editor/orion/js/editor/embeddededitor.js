@@ -102,7 +102,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		});
 		
 		// speaking of save...
-		document.getElementById("save").onclick = function() {save(editor);};
+		//document.getElementById("save").onclick = function() {save(editor);};
 
 	};
 		
@@ -110,12 +110,12 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var status = "";
 	
 	var statusReporter = function(message, isError) {
-		if (isError) {
+		/*if (isError) {
 			status =  "ERROR: " + message;
 		} else {
 			status = message;
 		}
-		document.getElementById("status").innerHTML = dirtyIndicator + status;
+		document.getElementById("status").innerHTML = dirtyIndicator + status;*/
 	};
 	
 	var editor = new mEditor.Editor({
@@ -135,7 +135,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		} else {
 			dirtyIndicator = "";
 		}
-		document.getElementById("status").innerHTML = dirtyIndicator + status;
+		// document.getElementById("status").innerHTML = dirtyIndicator + status;
 	});
 	
 	editor.installTextView();
@@ -153,6 +153,10 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		}
 	});
 	// end of code to run when content changes.
+	
+	if( window.javaEditor ) {
+	  window.javaEditor.initJava(editor);
+	}
 	
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
