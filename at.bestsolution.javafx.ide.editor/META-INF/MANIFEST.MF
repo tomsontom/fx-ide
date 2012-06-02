@@ -3,9 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Editor
 Bundle-SymbolicName: at.bestsolution.javafx.ide.editor
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: at.bestsolution.javafx.ide.editor.Activator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javafx.animation;version="2.0.0",
  javafx.application;version="2.0.0",
@@ -36,3 +33,4 @@ Import-Package: javafx.animation;version="2.0.0",
  javafx.stage;version="2.0.0",
  javafx.util;version="2.0.0"
 Bundle-ActivationPolicy: lazy
+Export-Package: at.bestsolution.javafx.ide.editor
