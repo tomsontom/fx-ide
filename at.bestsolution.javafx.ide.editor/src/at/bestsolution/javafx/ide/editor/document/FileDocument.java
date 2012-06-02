@@ -14,6 +14,16 @@ public class FileDocument implements Document {
 	public FileDocument(File f) {
 		this.f = f;
 	}
+	
+	@Override
+	public void insert(int start, String data) {
+		content.insert(start, data);
+	}
+	
+	@Override
+	public void set(String data) {
+		content = new StringBuilder(data);
+	}
 
 	@Override
 	public String get() {

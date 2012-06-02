@@ -79,10 +79,10 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	
 	var annotationFactory = new mEditorFeatures.AnnotationFactory();
 
-	function save(editor) {
+	/*function save(editor) {
 		editor.setInput(null, null, null, true);
 		window.alert("Save hook.");
-	}
+	}*/
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 		
@@ -97,19 +97,22 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		// save binding
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("s", true), "save");
 		editor.getTextView().setAction("save", function(){
-				save(editor);
+				// save(editor);
+				if( editor.__javaObject ) {
+					editor.__javaObject._js_Action("Save");
+				}
 				return true;
 		});
-		
-		// speaking of save...
-		//document.getElementById("save").onclick = function() {save(editor);};
-
 	};
 		
 	var dirtyIndicator = "";
 	var status = "";
 	
 	var statusReporter = function(message, isError) {
+		if( editor.__javaObject ) {
+			editor.__javaObject._js_StatusReporter(message, isError);
+		}
+		
 		/*if (isError) {
 			status =  "ERROR: " + message;
 		} else {
@@ -135,10 +138,30 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		} else {
 			dirtyIndicator = "";
 		}
+		
+		if( editor.__javaObject ) {
+			editor.__javaObject._js_Event("DirtyChanged", "Event", evt);
+		}
+		
+		alert("Dirty changes: " + editor.__javaObject);
 		// document.getElementById("status").innerHTML = dirtyIndicator + status;
 	});
 	
+	
+	
 	editor.installTextView();
+	
+	editor.getTextView().addEventListener("Modify", function(evt) {
+		if( editor.getTextView().__javaObject ) {
+			editor.getTextView().__javaObject._js_Event("Modify","orion.textview.ModifyEvent",evt);
+		}
+	});
+	editor.getTextView().addEventListener("ModelChanged", function(evt) {
+		if( editor.getTextView().__javaObject ) {
+			editor.getTextView().__javaObject._js_Event("ModelChanged","orion.textview.ModelChangedEvent",evt);
+		}
+	});
+	
 	// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
 	var contentName = "sample.js";  // for example, a file name, something the user recognizes as the content.
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
@@ -155,6 +178,8 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	// end of code to run when content changes.
 	
 	if( window.javaEditor ) {
+	  window.EditorImpl = editor;
+	  window.TextViewImpl = editor.getTextView();
 	  window.javaEditor.initJava(editor);
 	}
 	

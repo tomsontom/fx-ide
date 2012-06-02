@@ -16,6 +16,7 @@ public abstract class ProxyNCICallback<O> implements JavaScriptNCICallback<JSObj
 	@Override
 	public void initJava(JSObject jsObject) {
 		O o = (O) Proxy.newProxyInstance(jInterface.getClassLoader(), new Class[] {jInterface}, new JsInvocationHandler(jsObject, jInterface));
+		jsObject.setMember("__javaObject", o);
 		init(o);
 	}
 	

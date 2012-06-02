@@ -46,16 +46,25 @@ public class JavaEditor {
 	}
 	
 	static class StringDocument implements Document {
-		private StringBuilder b;
+		private StringBuilder content;
 		
 		public StringDocument(CharSequence initialContent) {
-			b = new StringBuilder(initialContent);
+			content = new StringBuilder(initialContent);
 		}
 		
 		@Override
 		public String get() {
-			return b.toString();
+			return content.toString();
+		}
+
+		@Override
+		public void insert(int start, String data) {
+			content.insert(start, data);
 		}
 		
+		@Override
+		public void set(String data) {
+			content = new StringBuilder(data);
+		}
 	}
 }
