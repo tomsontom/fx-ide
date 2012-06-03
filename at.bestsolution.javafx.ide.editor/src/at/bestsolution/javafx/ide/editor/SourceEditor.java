@@ -20,6 +20,7 @@ public class SourceEditor extends BorderPane {
 	private WebView webView;
 	private Editor editor;
 	private Document document;
+	private Runnable runnable;
 	
 	public SourceEditor() {
 		this.webView = new WebView();
@@ -82,7 +83,9 @@ public class SourceEditor extends BorderPane {
 			
 			@Override
 			public void run() {
-				
+				if( runnable != null ) {
+					runnable.run();
+				}
 			}
 		});
 	}
@@ -92,5 +95,9 @@ public class SourceEditor extends BorderPane {
 		if( editor != null ) {
 			editor.setInput("myclass.java", null, document.get());
 		}
+	}
+	
+	public void setSaveCallback(Runnable runnable) {
+		this.runnable = runnable;
 	}
 }
