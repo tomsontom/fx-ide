@@ -51,4 +51,3 @@ Import-Package: javafx.animation;version="2.0.0",
  javafx.stage;version="2.0.0",
  javafx.util;version="2.0.0"
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/workbench.xml
