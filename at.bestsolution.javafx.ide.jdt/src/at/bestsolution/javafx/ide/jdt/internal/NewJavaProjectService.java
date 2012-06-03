@@ -1,5 +1,6 @@
 package at.bestsolution.javafx.ide.jdt.internal;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +14,9 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -23,6 +24,11 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.project.IProjectConfigurationManager;
+import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathSupport;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathsBlock;
@@ -63,20 +69,50 @@ public class NewJavaProjectService implements IProjectService {
 					
 					IJavaProject javaProject = JavaCore.create(project);
 					
-					IFolder srcFolder = project.getFolder(new Path("src"));
 					
 					configureProject(project, monitor);
-					javaProject.setRawClasspath(
-							new IClasspathEntry[] {
-									JavaCore.newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)),
-									JavaCore.newSourceEntry(srcFolder.getFullPath())
-							}, monitor);
+					
+					IFolder srcFolder = project.getFolder(new Path("src"));
+					
+					List<CPListElement> classPathEntries = new ArrayList<CPListElement>();
+					CPListElement jreContainer = new CPListElement(javaProject, IClasspathEntry.CPE_CONTAINER, new Path(JavaRuntime.JRE_CONTAINER), null);
+					CPListElement src = new CPListElement(javaProject, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder);
+					classPathEntries.add(jreContainer);
+					classPathEntries.add(src);
+					
+//					for( IExecutionEnvironment e : JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments() ) {
+//						System.err.println(e.getId());
+//					}
+//					
+//					JavaRuntime.newJREContainerPath(environment)
+					
+					flush(classPathEntries, project.getFolder(new Path("bin")).getFullPath(), javaProject, null, monitor);
+					
+					
+					
+//					addMaven(project);
 				}
 				
 			},monitor);
 		} catch (CoreException e) {
 			//TODO Need to log
 			e.printStackTrace();
+		}
+	}
+	
+	private void addMaven(IProject prj) throws CoreException {
+		ResolverConfiguration configuration = new ResolverConfiguration();
+		configuration.setResolveWorkspaceProjects(false);
+//		configuration.setSelectedProfiles(""); //$NON-NLS-1$
+
+		boolean hasMavenNature = prj.hasNature(IMavenConstants.NATURE_ID);
+
+		IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
+
+		configurationManager.enableMavenNature(prj, configuration, new NullProgressMonitor());
+
+		if (!hasMavenNature) {
+			configurationManager.updateProjectConfiguration(prj, new NullProgressMonitor());
 		}
 	}
 	

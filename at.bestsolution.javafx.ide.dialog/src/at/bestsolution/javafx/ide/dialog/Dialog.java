@@ -57,6 +57,7 @@ public abstract class Dialog {
 	protected Node createButtonBar() {
 		HBox b = new HBox(10);
 		b.setPadding(new Insets(10));
+//		b.setStyle("-fx-border-style: solid none none; -fx-border-color: lightgray; -fx-border-width: 2px;");
 		Region spacer = new Region();
 		
 		b.getChildren().add(spacer);

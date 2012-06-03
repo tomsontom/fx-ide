@@ -28,12 +28,14 @@ import javafx.stage.Stage;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -43,10 +45,10 @@ import org.osgi.framework.ServiceReference;
 
 import at.bestsolution.javafx.ide.dialog.Dialog;
 import at.bestsolution.javafx.ide.projectexplorer.ProjectExplorer;
+import at.bestsolution.javafx.ide.services.FileInput;
 import at.bestsolution.javafx.ide.services.IEditorInput;
 import at.bestsolution.javafx.ide.services.IEditorService;
 import at.bestsolution.javafx.ide.services.IProjectService;
-import at.bestsolution.javafx.ide.services.IResourceFileInput;
 import at.bestsolution.javafx.ide.services.IResourceService;
 import at.bestsolution.javafx.ide.services.IWorkbench;
 
@@ -147,6 +149,8 @@ public class IDEAppLauncher implements IWorkbench {
 				e1.printStackTrace();
 			}
 			
+			bar.getItems().add(b);
+			
 			BundleContext btx = Activator.getContext();
 			Collection<ServiceReference<IResourceService>> refs = btx.getServiceReferences(IResourceService.class, null);
 			for( ServiceReference<IResourceService> r : refs) {
@@ -187,7 +191,18 @@ public class IDEAppLauncher implements IWorkbench {
 	}
 	
 	void handleNewResource(final IResourceService service) {
-		service.create(explorer.getCurrentProject(), stage);
+		IResource r = explorer.getCurrentResource();
+		IResource newFile;
+		if( r instanceof IContainer ) {
+			newFile = service.create((IContainer) r, stage);	
+		} else {
+			newFile = service.create(r.getParent(), stage);
+		}
+		
+		if( newFile instanceof IFile ) {
+			openEditor(new FileInput((IFile) newFile));	
+		}
+		
 	}
 	
 	void handleNewProject(final IProjectService service) {
@@ -253,6 +268,7 @@ public class IDEAppLauncher implements IWorkbench {
 					Object o = ContextInjectionFactory.make(es.getEditorClass(), editorContext);
 					
 					editorArea.getTabs().add(t);
+					editorArea.getSelectionModel().select(t);
 				}
 			}
 		} catch (InvalidSyntaxException e) {

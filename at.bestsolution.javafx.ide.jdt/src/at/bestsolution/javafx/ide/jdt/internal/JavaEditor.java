@@ -8,9 +8,12 @@ import javafx.scene.layout.BorderPane;
 
 import javax.inject.Inject;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaModelMarker;
 
 import at.bestsolution.javafx.ide.editor.Document;
 import at.bestsolution.javafx.ide.editor.SourceEditor;
@@ -35,6 +38,13 @@ public class JavaEditor {
 					InputStream in = new ByteArrayInputStream(doc.get().getBytes());
 					try {
 						fsInput.getFile().setContents(in, IResource.FORCE|IResource.KEEP_HISTORY, new NullProgressMonitor());
+//						fsInput.getFile().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+//						
+//						IMarker[] ms = fsInput.getFile().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,
+//					            true, IResource.DEPTH_INFINITE);
+//						for( IMarker m : ms ) {
+//							System.err.println(m);
+//						}
 					} catch (CoreException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

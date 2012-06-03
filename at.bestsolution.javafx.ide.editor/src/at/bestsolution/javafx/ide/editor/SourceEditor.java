@@ -51,7 +51,7 @@ public class SourceEditor extends BorderPane {
 			
 			@Override
 			public void handle(WebEvent<String> event) {
-				System.err.println("This is an alert: " + event);
+//				System.err.println("This is an alert: " + event);
 			}
 		});
 		setCenter(webView);

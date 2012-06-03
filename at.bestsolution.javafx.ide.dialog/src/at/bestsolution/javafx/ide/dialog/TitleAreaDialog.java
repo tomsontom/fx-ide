@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 
@@ -28,10 +27,12 @@ public abstract class TitleAreaDialog extends Dialog {
 	
 	@Override
 	protected final Node createDialogArea() {
-		BorderPane pane = new BorderPane();
+		VBox pane = new VBox();
 		BorderPane titleArea = new BorderPane();
+		titleArea.setPadding(new Insets(0,0,0,10));
 		
 		VBox messageArea = new VBox();
+		messageArea.setPadding(new Insets(10, 0, 0, 0));
 		messageArea.getChildren().add(new Label(title));
 		messageArea.getChildren().add(new Label(message));
 		
@@ -43,15 +44,20 @@ public abstract class TitleAreaDialog extends Dialog {
 			e.printStackTrace();
 		}
 		
-		pane.setTop(titleArea);
-		pane.setCenter(createDialogContent());
+		titleArea.setStyle("-fx-border-style: none none solid none; -fx-border-color: lightgray; -fx-border-width: 2px;");
+		
+		pane.getChildren().add(titleArea);
+		BorderPane dialogContent = new BorderPane();
+		dialogContent.setCenter(createDialogContent());
+		dialogContent.setPadding(new Insets(10, 10, 10, 10));
+		pane.getChildren().add(dialogContent);
 		
 		return pane;
 	}
 	
 	@Override
 	protected Insets getContentInset() {
-		return new Insets(0,0,0,10);
+		return new Insets(0,0,0,0);
 	}
 
 	protected abstract Node createDialogContent();

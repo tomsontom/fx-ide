@@ -43,7 +43,7 @@ public class EditorImpl extends NativeObjectWrapper implements Editor {
 	}
 	
 	public void _js_StatusReporter(Object message, Object error) {
-		System.err.println("Status-Report: " + message + " => " + error);
+//		System.err.println("Status-Report: " + message + " => " + error);
 	}
 
 	@Override
