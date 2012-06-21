@@ -216,7 +216,7 @@ public class IDEAppLauncher implements IWorkbench {
 	}
 	
 	void handleNewProject(final IProjectService service) {
-		Dialog d = new Dialog(stage) {
+		Dialog d = new Dialog(stage,"New Project") {
 			
 			private TextField txt;
 
