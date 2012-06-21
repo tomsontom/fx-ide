@@ -8,7 +8,6 @@ import javafx.stage.Window;
 
 public class PromptInputDialog extends Dialog {
 	private String text;
-	private String value;
 	private TextField f;
 	private String input;
 	
