@@ -26,7 +26,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -34,11 +33,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.internal.IMavenConstants;
-import org.eclipse.m2e.core.project.IProjectConfigurationManager;
-import org.eclipse.m2e.core.project.ResolverConfiguration;
 
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathSupport;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathsBlock;
@@ -110,21 +104,21 @@ public class NewJavaProjectService implements IProjectService {
 		}
 	}
 	
-	private void addMaven(IProject prj) throws CoreException {
-		ResolverConfiguration configuration = new ResolverConfiguration();
-		configuration.setResolveWorkspaceProjects(false);
-//		configuration.setSelectedProfiles(""); //$NON-NLS-1$
-
-		boolean hasMavenNature = prj.hasNature(IMavenConstants.NATURE_ID);
-
-		IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
-
-		configurationManager.enableMavenNature(prj, configuration, new NullProgressMonitor());
-
-		if (!hasMavenNature) {
-			configurationManager.updateProjectConfiguration(prj, new NullProgressMonitor());
-		}
-	}
+//	private void addMaven(IProject prj) throws CoreException {
+//		ResolverConfiguration configuration = new ResolverConfiguration();
+//		configuration.setResolveWorkspaceProjects(false);
+////		configuration.setSelectedProfiles(""); //$NON-NLS-1$
+//
+//		boolean hasMavenNature = prj.hasNature(IMavenConstants.NATURE_ID);
+//
+//		IProjectConfigurationManager configurationManager = MavenPlugin.getProjectConfigurationManager();
+//
+//		configurationManager.enableMavenNature(prj, configuration, new NullProgressMonitor());
+//
+//		if (!hasMavenNature) {
+//			configurationManager.updateProjectConfiguration(prj, new NullProgressMonitor());
+//		}
+//	}
 	
 	private void configureProject(IProject project, IProgressMonitor monitor) throws CoreException {
 		IProjectDescription description = project.getDescription();

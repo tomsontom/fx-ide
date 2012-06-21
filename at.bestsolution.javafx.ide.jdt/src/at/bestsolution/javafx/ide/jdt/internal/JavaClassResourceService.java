@@ -78,7 +78,7 @@ public class JavaClassResourceService implements IResourceService {
 
 	@Override
 	public IResource create(final IContainer container, Stage parent) {
-		TitleAreaDialog dialog = new TitleAreaDialog(parent, "New Class",
+		TitleAreaDialog dialog = new TitleAreaDialog(parent, "New Class", "New Class",
 				"Create a new Java Class", getClass().getClassLoader()
 						.getResource("/icons/wizban/newclass_wiz.png")) {
 
