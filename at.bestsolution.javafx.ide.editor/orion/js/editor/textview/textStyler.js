@@ -14,7 +14,7 @@
 
 define("editor/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 
-	var JS_KEYWORDS =
+/*	var JS_KEYWORDS =
 		["break",
 		 "case", "class", "catch", "continue", "const", 
 		 "debugger", "default", "delete", "do",
@@ -31,6 +31,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "var", "void",
 		 "while", "with",
 		 "yield"];
+*/
 
 	var JAVA_KEYWORDS =
 		["abstract",
@@ -49,6 +50,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "void", "volatile",
 		 "while"];
 
+/*
 	var CSS_KEYWORDS =
 		["alignment-adjust", "alignment-baseline", "animation", "animation-delay", "animation-direction", "animation-duration",
 		 "animation-iteration-count", "animation-name", "animation-play-state", "animation-timing-function", "appearance",
@@ -88,7 +90,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "volume", "white-space", "white-space-collapse",
 		 "widows", "width", "word-break", "word-spacing", "word-wrap", "z-index"
 		];
-
+*/
 	// Scanner constants
 	var UNKOWN = 1;
 	var KEYWORD = 2;
@@ -416,8 +418,8 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		var keywords = [];
 		switch (lang) {
 			case "java": keywords = JAVA_KEYWORDS; break;
-			case "js": keywords = JS_KEYWORDS; break;
-			case "css": keywords = CSS_KEYWORDS; break;
+//			case "js": keywords = JS_KEYWORDS; break;
+//			case "css": keywords = CSS_KEYWORDS; break;
 		}
 		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
