@@ -28,8 +28,8 @@ public abstract class TitleAreaDialog extends Dialog {
 	private String message;
 	private URL imageURI;
 	
-	public TitleAreaDialog(Window parent, String title, String message, URL imageURI) {
-		super(parent);
+	public TitleAreaDialog(Window parent, String windowTitle, String title, String message, URL imageURI) {
+		super(parent, windowTitle);
 		this.title = title;
 		this.message = message;
 		this.imageURI = imageURI;

@@ -39,9 +39,12 @@ public abstract class Dialog {
 	private boolean blockOnOpen = true;
 	private int returnCode;
 	private List<Button> buttons;
+	private String title;
+	private Window parent;
 	
-	public Dialog(Window parent) {
-		
+	public Dialog(Window parent, String title) {
+		this.parent = parent;
+		this.title = title;
 	}
 	
 	protected Parent createContents() {
@@ -122,6 +125,9 @@ public abstract class Dialog {
 	
 	protected Stage create() {
 		Stage stage = new Stage(StageStyle.UTILITY);
+		stage.setTitle(title);
+// Causes problems when embedded in SWT		
+//		stage.initOwner(parent);
 		Parent content = createContents();
 		stage.setScene(new Scene(content));
 		return stage;

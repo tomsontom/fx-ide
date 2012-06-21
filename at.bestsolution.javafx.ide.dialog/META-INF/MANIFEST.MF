@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Dialog
 Bundle-SymbolicName: at.bestsolution.javafx.ide.dialog
 Bundle-Version: 1.0.0.qualifier
-Require-Bundle: org.eclipse.core.runtime
 Import-Package: javafx.animation;version="2.0.0",
  javafx.application;version="2.0.0",
  javafx.beans;version="2.0.0",
