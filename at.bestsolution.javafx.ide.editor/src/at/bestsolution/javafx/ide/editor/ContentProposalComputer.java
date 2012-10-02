@@ -5,7 +5,8 @@ import java.util.List;
 public interface ContentProposalComputer {
 	enum Type {
 		METHOD,
-		FIELD
+		FIELD,
+		TYPE
 	}
 	
 	public static class Proposal {
