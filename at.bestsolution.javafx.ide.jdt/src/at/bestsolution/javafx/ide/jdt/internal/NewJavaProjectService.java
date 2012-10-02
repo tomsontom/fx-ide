@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import at.bestsolution.efxclipse.tooling.jdt.core.JavaFXCore;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathSupport;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathsBlock;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.CPListElement;
@@ -83,18 +84,9 @@ public class NewJavaProjectService implements IProjectService {
 					CPListElement src = new CPListElement(javaProject, IClasspathEntry.CPE_SOURCE, srcFolder.getFullPath(), srcFolder);
 					classPathEntries.add(jreContainer);
 					classPathEntries.add(src);
-					
-//					for( IExecutionEnvironment e : JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments() ) {
-//						System.err.println(e.getId());
-//					}
-//					
-//					JavaRuntime.newJREContainerPath(environment)
+					classPathEntries.add(new CPListElement(javaProject, IClasspathEntry.CPE_CONTAINER, JavaFXCore.JAVAFX_CONTAINER_PATH, null));
 					
 					flush(classPathEntries, project.getFolder(new Path("bin")).getFullPath(), javaProject, null, monitor);
-					
-					
-					
-//					addMaven(project);
 				}
 				
 			},monitor);

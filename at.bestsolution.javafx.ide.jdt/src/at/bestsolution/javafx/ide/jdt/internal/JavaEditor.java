@@ -89,14 +89,14 @@ public class JavaEditor {
 							}
 							
 							if( proposal.getKind() == CompletionProposal.METHOD_REF ) {
-//								ownerType.getMethod(name, parameterTypeSignatures)
 								String sig = Signature.toString(
 										new String(proposal.getSignature()), 
 										new String(proposal.getName()), 
 										null,
 										false, false);
 								l.add(new Proposal(Type.METHOD, completion, 
-										sig + " : " + Signature.getSimpleName(Signature.toString(Signature.getReturnType(new String(proposal.getSignature())))) + " - " + Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature()))
+										sig + " : " + Signature.getSimpleName(Signature.toString(Signature.getReturnType(new String(proposal.getSignature())))) + 
+										" - " + Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature()))
 										));
 							} else if( proposal.getKind() == CompletionProposal.FIELD_REF ) {
 								String description = completion + " : " + 
@@ -104,6 +104,11 @@ public class JavaEditor {
 										" - " + 
 										( proposal.getDeclarationSignature() != null ? Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature())) : "<unknown>" );
 								l.add(new Proposal(Type.FIELD, completion,description));
+							} else if( proposal.getKind() == CompletionProposal.TYPE_REF ) {
+								if( proposal.getAccessibility() == IAccessRule.K_NON_ACCESSIBLE ) {
+									return;
+								}
+								l.add(new Proposal(Type.TYPE, new String(proposal.getCompletion()), Signature.getSignatureSimpleName(new String(proposal.getSignature()))));
 							}
 						}
 					});
