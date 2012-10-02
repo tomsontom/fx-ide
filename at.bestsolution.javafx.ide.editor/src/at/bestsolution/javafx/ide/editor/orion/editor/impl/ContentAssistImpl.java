@@ -5,6 +5,7 @@ import java.util.List;
 import netscape.javascript.JSObject;
 import at.bestsolution.javafx.ide.editor.ContentProposalComputer;
 import at.bestsolution.javafx.ide.editor.ContentProposalComputer.Proposal;
+import at.bestsolution.javafx.ide.editor.ContentProposalComputer.Type;
 import at.bestsolution.javafx.ide.editor.orion.editor.ContentAssist;
 
 @SuppressWarnings("restriction")
@@ -34,7 +35,14 @@ public class ContentAssistImpl implements ContentAssist {
 				v = v.substring(prefix.length());
 			}
 			
-			b.append("	{ \"proposal\": \""+v+"\", \"description\": \""+p.description+"\" }");
+			b.append("	{ ");
+			b.append("\"proposal\": \""+v+"\" ");
+			b.append(",\"description\": \""+p.description+"\" ");
+			if( p.type == Type.METHOD ) {
+				b.append(",\"escapePosition\": "+(offset+v.length()-1)+" ");	
+			}
+			
+			b.append("}");
 			flag = true;
 		}
 		b.append("]");
