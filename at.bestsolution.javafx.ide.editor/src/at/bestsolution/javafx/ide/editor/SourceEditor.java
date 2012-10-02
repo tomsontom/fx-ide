@@ -10,6 +10,9 @@
  *******************************************************************************/
 package at.bestsolution.javafx.ide.editor;
 
+import java.util.Collections;
+import java.util.List;
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
@@ -21,16 +24,20 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import netscape.javascript.JSObject;
+import at.bestsolution.javafx.ide.editor.ContentProposalComputer.Proposal;
 import at.bestsolution.javafx.ide.editor.js.JavaScriptNCICallback;
 import at.bestsolution.javafx.ide.editor.orion.editor.Editor;
+import at.bestsolution.javafx.ide.editor.orion.editor.impl.ContentAssistImpl;
 import at.bestsolution.javafx.ide.editor.orion.editor.impl.EditorImpl;
 import at.bestsolution.javafx.ide.editor.orion.textview.ModelChangedEvent;
 
+@SuppressWarnings("restriction")
 public class SourceEditor extends BorderPane {
 	private WebView webView;
 	private Editor editor;
 	private Document document;
 	private Runnable runnable;
+	private ContentProposalComputer computer;
 	
 	public SourceEditor() {
 		this.webView = new WebView();
@@ -52,6 +59,25 @@ public class SourceEditor extends BorderPane {
 							initEditor(e);
 						}
 					}); 
+					win.setMember("javaContentAssist", new JavaScriptNCICallback<JSObject>() {
+
+						@Override
+						public void initJava(JSObject jsObject) {
+							ContentProposalComputer delegate = new ContentProposalComputer() {
+								
+								@Override
+								public List<Proposal> computeProposals(String line, String prefix,
+										int offset) {
+									if( computer != null ) { 
+										return computer.computeProposals(line, prefix, offset); 
+									} else { 
+										return Collections.emptyList(); 
+									}
+								}
+							};
+							new ContentAssistImpl(delegate, jsObject);
+						}
+					});
 				}
 			}
 		});
@@ -65,6 +91,10 @@ public class SourceEditor extends BorderPane {
 			}
 		});
 		setCenter(webView);
+	}
+	
+	void initContentAssist(Object o) {
+		System.err.println(o);
 	}
 	
 	void initEditor(final Editor editor) { 
@@ -98,6 +128,10 @@ public class SourceEditor extends BorderPane {
 				}
 			}
 		});
+	}
+	
+	public void setContentProposalComputer(ContentProposalComputer computer) {
+		this.computer = computer;
 	}
 	
 	public void setDocument(Document document) {

@@ -23,9 +23,10 @@ define([
 	"orion/editor/editorFeatures",
 	"orion/editor/contentAssist",
 	"orion/editor/jsContentAssist",
-	"orion/editor/cssContentAssist"],
+	"orion/editor/cssContentAssist",
+	"orion/editor/javaContentAssist"],
 
-function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist){
+function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist, mJavaContentAssist){
 	
 	var editorDomNode = document.getElementById("editor");
 	
@@ -46,6 +47,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	};
 	var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 	var jsContentAssistProvider = new mJSContentAssist.JavaScriptContentAssistProvider();
+	var javaContentAssistProvider = new mJavaContentAssist.JavaContentAssistProvider();
 	
 	// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 	var syntaxHighlighter = {
@@ -173,6 +175,8 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 			contentAssist.setProviders([cssContentAssistProvider]);
 		} else if (/\.js$/.test(contentName)) {
 			contentAssist.setProviders([jsContentAssistProvider]);
+		} else {
+			contentAssist.setProviders([javaContentAssistProvider]);
 		}
 	});
 	// end of code to run when content changes.
@@ -181,6 +185,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	  window.EditorImpl = editor;
 	  window.TextViewImpl = editor.getTextView();
 	  window.javaEditor.initJava(editor);
+	  window.javaContentAssist.initJava(javaContentAssistProvider);
 	}
 	
 	window.onbeforeunload = function() {
