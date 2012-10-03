@@ -8,7 +8,7 @@
 body {
 	margin: 0;
 	padding: 0;
-	font: 12px Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+	font: 14px Monaco;
 }
 
 a {
@@ -35,9 +35,31 @@ a:hover {
 	cursor: default;
 	overflow: auto;
 	height: 150px;
-	width: 200px;
+	width: 500px;
 }
 
 .contentassist .selected {
 	background-color: #dddddd;
+}
+
+.textviewContainer {
+	font: 14px Monaco;
+}
+
+.content-item {
+	padding-left: 20px;
+	background-position: left center;
+	background-repeat: no-repeat;
+}
+
+.class-item {
+	background-image: url("class_obj.gif");
+}
+
+.method-item {
+	background-image: url("methpub_obj.gif");
+}
+
+.field-item {
+	background-image: url("field_public_obj.gif");
 }

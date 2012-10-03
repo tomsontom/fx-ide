@@ -399,8 +399,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				div.className = "selected";
 				this.parentNode.setAttribute("aria-activedescendant", div.id);
 			}
-			var textNode = document.createTextNode(proposal);
-			div.appendChild(textNode, div);
+			//var textNode = document.createTextNode(proposal);
+			//div.appendChild(textNode, div);
+			div.innerHTML = proposal;
 			parent.appendChild(div);
 		},
 		/** @private */

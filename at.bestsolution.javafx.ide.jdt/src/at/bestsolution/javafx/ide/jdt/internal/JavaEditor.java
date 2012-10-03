@@ -94,21 +94,24 @@ public class JavaEditor {
 										new String(proposal.getName()), 
 										null,
 										false, false);
-								l.add(new Proposal(Type.METHOD, completion, 
-										sig + " : " + Signature.getSimpleName(Signature.toString(Signature.getReturnType(new String(proposal.getSignature())))) + 
-										" - " + Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature()))
-										));
+								StyledString s = new StyledString(sig + " : " + Signature.getSimpleName(Signature.toString(Signature.getReturnType(new String(proposal.getSignature())))));
+								s.appendString(" - " + Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature())), Style.colored("#AAAAAA"));
+								
+								l.add(new Proposal(Type.METHOD, completion, s));
 							} else if( proposal.getKind() == CompletionProposal.FIELD_REF ) {
-								String description = completion + " : " + 
-										(proposal.getSignature() != null ? Signature.getSignatureSimpleName(new String(proposal.getSignature())) : "<unknown>" ) + 
-										" - " + 
-										( proposal.getDeclarationSignature() != null ? Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature())) : "<unknown>" );
-								l.add(new Proposal(Type.FIELD, completion,description));
+								StyledString s = new StyledString(completion + " : " + (proposal.getSignature() != null ? Signature.getSignatureSimpleName(new String(proposal.getSignature())) : "<unknown>" ));
+								s.appendString(" - " +  (proposal.getDeclarationSignature() != null ? Signature.getSignatureSimpleName(new String(proposal.getDeclarationSignature())) : "<unknown>"), Style.colored("#AAAAAA"));
+								l.add(new Proposal(Type.FIELD, completion,s));
 							} else if( proposal.getKind() == CompletionProposal.TYPE_REF ) {
 								if( proposal.getAccessibility() == IAccessRule.K_NON_ACCESSIBLE ) {
 									return;
 								}
-								l.add(new Proposal(Type.TYPE, new String(proposal.getCompletion()), Signature.getSignatureSimpleName(new String(proposal.getSignature()))));
+								
+								StyledString s = new StyledString(Signature.getSignatureSimpleName(new String(proposal.getSignature())));
+								s.appendString(" - " + new String(proposal.getDeclarationSignature()), Style.colored("#AAAAAA"));
+								l.add(new Proposal(Type.TYPE, new String(proposal.getCompletion()), s));
+							} else {
+								System.err.println(proposal);
 							}
 						}
 					});

@@ -41,7 +41,7 @@ public class SourceEditor extends BorderPane {
 	
 	public SourceEditor() {
 		this.webView = new WebView();
-		this.webView.setFontSmoothingType(FontSmoothingType.GRAY);
+		this.webView.setFontSmoothingType(FontSmoothingType.LCD);
 		final WebEngine engine = this.webView.getEngine();
 		
 		engine.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
