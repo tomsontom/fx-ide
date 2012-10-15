@@ -12,26 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
-	var Promise = (function() {
-		function Promise() {
-		}
-		Promise.prototype.then = function(callback) {
-			this.callback = callback;
-			if (this.result) {
-				var promise = this;
-				setTimeout(function() { promise.callback(promise.result); }, 0);
-			}
-		};
-		Promise.prototype.done = function(result) {
-			this.result = result;
-			if (this.callback) {
-				this.callback(this.result);
-			}
-		};
-		return Promise;
-	}());
-
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred'], function(messages, mKeyBinding, mEventTarget, Deferred) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -97,6 +78,15 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		ACTIVE: 2,
 		FILTERING: 3
 	};
+	
+	var STYLES = {
+		selected : " selected",
+		hr : "proposal-hr",
+		emphasis : "proposal-emphasis",
+		noemphasis : "proposal-noemphasis",
+		dfault : "proposal-default"
+	};
+	
 	function ContentAssist(textView) {
 		this.textView = textView;
 		this.state = State.INACTIVE;
@@ -124,11 +114,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 		};
 		var isMac = navigator.platform.indexOf("Mac") !== -1;
-		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), messages.contentAssist);
-		textView.setAction(messages.contentAssist, function() {
+		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
+		textView.setAction("contentAssist", function() {
 			self.activate();
 			return true;
-		});
+		}, {name: messages.contentAssist});
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 		/**
@@ -141,14 +131,21 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				return false;
 			}
 			var offset = this.textView.getCaretOffset();
+			var start = offset;
+			var end = offset;
+			
+			if( proposal.replace ) {
+			   start = this.getPrefixStart(offset);
+			}
+			
 			var data = {
 				proposal: proposal,
-				start: offset,
-				end: offset
+				start: start,
+				end: end
 			};
 			this.setState(State.INACTIVE);
 			var proposalText = proposal.proposal || proposal;
-			this.textView.setText(proposalText, offset, offset);
+			this.textView.setText(proposalText, start, end);
 			this.dispatchEvent({type: "ProposalApplied", data: data});
 			return true;
 		},
@@ -173,7 +170,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var deletion = event.removedCharCount > 0 && event.addedCharCount === 0,
 			    view = this.textView,
 			    overWhitespace = (event.start+1 <= view.getModel().getCharCount()) && /^\s*$/.test(view.getText(event.start, event.start+1));
-			return event.removedLineCount > 0 || (deletion && overWhitespace);
+			return event.removedLineCount > 0 || event.addedLineCount > 0 || (deletion && overWhitespace);
 		},
 		/** @private */
 		setState: function(state) {
@@ -226,30 +223,20 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			return index;
 		},
+		handleError: function(error) {
+			if (typeof console !== "undefined") {
+				console.log("Error retrieving content assist proposals");
+				console.log(error);
+			}
+		},
 		/**
 		 * @private
 		 * Retrieves the proposals at the given offset.
 		 * @param {Number} offset The caret offset.
-		 * @returns {Promise} A promise that will provide the proposals.
+		 * @returns {Deferred} A promise that will provide the proposals.
 		 */
 		_computeProposals: function(offset) {
-			var proposals = [],
-			    numComplete = 0,
-			    promise = new Promise(),
-			    providers = this.providers;
-			function collectProposals(result) {
-				if (result) {
-					proposals = proposals.concat(result);
-				}
-				if (++numComplete === providers.length) {
-					promise.done(proposals);
-				}
-			}
-			function errback() {
-				if (++numComplete === providers.length) {
-					promise.done(proposals);
-				}
-			}
+			var providers = this.providers;
 			var textView = this.textView, textModel = textView.getModel();
 			var buffer = textView.getText();
 			var context = {
@@ -257,21 +244,25 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				prefix: textView.getText(this.getPrefixStart(offset), offset),
 				selection: textView.getSelection()
 			};
-			for (var i=0; i < providers.length; i++) {
-				var provider = providers[i];
+			var self = this;
+			var promises = providers.map(function(provider) {
 				//prefer computeProposals but support getProposals for backwards compatibility
-				var proposalsFunc = provider.getProposals;
-				if (typeof provider.computeProposals === "function") {
-					proposalsFunc = provider.computeProposals;
+				var func = provider.computeProposals || provider.getProposals;
+				var proposals;
+				try {
+					if (typeof func === "function") { //$NON-NLS-0$
+						proposals = func.apply(provider, [buffer, offset, context]);
+					}
+				} catch (e) {
+					self.handleError(e);
 				}
-				var proposalsPromise = proposalsFunc.apply(provider, [buffer, offset, context]);
-				if (proposalsPromise && proposalsPromise.then) {
-					proposalsPromise.then(collectProposals, errback);
-				} else {
-					collectProposals(proposalsPromise);
-				}
-			}
-			return promise;
+				return Deferred.when(proposals);
+			});
+			return Deferred.all(promises, this.handleError).then(function(proposalArrays) {
+				return proposalArrays.reduce(function(prev, curr) {
+					return (curr instanceof Array) ? prev.concat(curr) : prev;
+				}, []);
+			});
 		},
 		/**
 		 * Sets the content assist providers that this ContentAssist will consult to obtain proposals.
@@ -315,14 +306,22 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			return this.getContentAssist().isActive();
 		},
 		lineUp: function() {
-			this.selectedIndex = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
+			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
+			while (this.proposals[newSelected].unselectable && newSelected > 0) {
+				newSelected--;
+			}
+			this.selectedIndex = newSelected;
 			if (this.widget) {
 				this.widget.setSelectedIndex(this.selectedIndex);
 			}
 			return true;
 		},
 		lineDown: function() {
-			this.selectedIndex = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
+			var newSelected = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
+			while (this.proposals[newSelected].unselectable && newSelected < this.proposals.length-1) {
+				newSelected++;
+			}
+			this.selectedIndex = newSelected;
 			if (this.widget) {
 				this.widget.setSelectedIndex(this.selectedIndex);
 			}
@@ -349,14 +348,26 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 * @description Creates a ContentAssistWidget that will display proposals from the given {@link orion.editor.ContentAssist}
 	 * in the given <code>parentNode</code>. Clicking a proposal will cause the ContentAssist to apply that proposal.
 	 * @param {orion.editor.ContentAssist} contentAssist
-	 * @param {String|DomNode} parentNode The ID or DOM node to use as the parent for displaying proposals.
+	 * @param {String|DomNode} [parentNode] The ID or DOM node to use as the parent for displaying proposals. If not provided,
+	 * a new DIV will be created inside &lt;body&gt; and assigned the CSS class <code>contentassist</code>.
 	 */
 	function ContentAssistWidget(contentAssist, parentNode) {
 		this.contentAssist = contentAssist;
 		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
+		this.isShowing = false;
 		var self = this;
+		if (!this.parentNode) {
+			this.parentNode = document.createElement("div");
+			this.parentNode.className = "contentassist";
+			var body = document.getElementsByTagName("body")[0];
+			if (body) {
+				body.appendChild(this.parentNode);
+			} else {
+				throw new Error("parentNode is required");
+			}
+		}
 		this.textViewListener = {
 			onMouseDown: function(event) {
 				if (event.event.target.parentElement !== self.parentNode) {
@@ -383,6 +394,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			self.textViewListenerAdded = false;
 		});
+		this.scrollListener = function(e) {
+			if (self.isShowing) {
+				self.position();
+			}
+		};
+		document.addEventListener("scroll", this.scrollListener);
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
 		/** @private */
@@ -395,13 +412,26 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var div = document.createElement("div");
 			div.id = "contentoption" + itemIndex;
 			div.setAttribute("role", "option");
-			if (isSelected) {
-				div.className = "selected";
-				this.parentNode.setAttribute("aria-activedescendant", div.id);
+			var node;
+			if (proposal.style === "hr") {
+				node = document.createElement("hr");
+				div.appendChild(node, div);
+			} else if( proposal.style === "html" ) {
+				div.className = this.calculateClasses(proposal.style, isSelected);
+				if (isSelected) {
+					this.parentNode.setAttribute("aria-activedescendant", div.id);
+				}
+				
+				div.innerHTML = this.getDisplayString(proposal);
+			} else {
+				div.className = this.calculateClasses(proposal.style, isSelected);
+				node = document.createTextNode(this.getDisplayString(proposal));
+				if (isSelected) {
+					this.parentNode.setAttribute("aria-activedescendant", div.id);
+				}
+				div.appendChild(node, div);
 			}
-			//var textNode = document.createTextNode(proposal);
-			//div.appendChild(textNode, div);
-			div.innerHTML = proposal;
+			
 			parent.appendChild(div);
 		},
 		/** @private */
@@ -417,6 +447,14 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				});
 			}
 			this._isAccessible = true;
+		},
+		/** @private */
+		calculateClasses : function(style, isSelected) {
+			var cssClass = STYLES[style];
+			if (!cssClass) {
+				cssClass = STYLES.dfault;
+			}
+			return isSelected ? cssClass + STYLES.selected : cssClass;
 		},
 		/** @private */
 		getDisplayString: function(proposal) {
@@ -455,11 +493,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var nodes = this.parentNode.childNodes;
 			for (var i=0; i < nodes.length; i++) {
 				var child = nodes[i];
-				if (child.className === "selected") {
-					child.className = "";
+				var selIndex = child.className.indexOf(STYLES.selected);
+				if (selIndex >= 0) {
+					child.className = child.className.substring(0, selIndex) + 
+							child.className.substring(selIndex + STYLES.selected.length);
 				}
 				if (child === node) {
-					child.className = "selected";
+					child.className = child.className + STYLES.selected;
 					this.parentNode.setAttribute("aria-activedescendant", child.id);
 					child.focus();
 					if (child.offsetTop < this.parentNode.scrollTop) {
@@ -478,14 +518,27 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.hide();
 				return;
 			}
-			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
-			caretLocation.y += this.textView.getLineHeight();
 			this.parentNode.innerHTML = "";
 			for (var i = 0; i < this.proposals.length; i++) {
-				this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.parentNode, i);
+				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
 			}
+			this.position();
+			this.parentNode.onclick = this.onClick.bind(this);
+			this.isShowing = true;
+		},
+		hide: function() {
+			if(document.activeElement === this.parentNode) {
+				this.textView.focus();
+			}
+			this.parentNode.style.display = "none";
+			this.parentNode.onclick = null;
+			this.isShowing = false;
+		},
+		position: function() {
+			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
+			caretLocation.y += this.textView.getLineHeight();
 			this.textView.convert(caretLocation, "document", "page");
-			this.parentNode.style.position = "absolute";
+			this.parentNode.style.position = "fixed";
 			this.parentNode.style.left = caretLocation.x + "px";
 			this.parentNode.style.top = caretLocation.y + "px";
 			this.parentNode.style.display = "block";
@@ -500,14 +553,6 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			if (caretLocation.x + this.parentNode.offsetWidth > viewportWidth) {
 				this.parentNode.style.left = (viewportWidth - this.parentNode.offsetWidth) + "px";
 			}
-			this.parentNode.onclick = this.onClick.bind(this);
-		},
-		hide: function() {
-			if(document.activeElement === this.parentNode) {
-				this.textView.focus();
-			}
-			this.parentNode.style.display = "none";
-			this.parentNode.onclick = null;
 		}
 	};
 	return {

@@ -31,6 +31,7 @@ import javafx.stage.StageStyle;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -51,6 +52,7 @@ import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -78,6 +80,8 @@ public class JavaClassResourceService implements IResourceService {
 
 	@Override
 	public IResource create(final IContainer container, Stage parent) {
+		resource = null;
+		
 		TitleAreaDialog dialog = new TitleAreaDialog(parent, "New Class", "New Class",
 				"Create a new Java Class", getClass().getClassLoader()
 						.getResource("/icons/wizban/newclass_wiz.png")) {
@@ -148,8 +152,11 @@ public class JavaClassResourceService implements IResourceService {
 			IJavaProject jProject = JavaCore.create(pr);
 			jProject.open(new NullProgressMonitor());
 			jRoot.open(new NullProgressMonitor());
-			ICompilationUnit u = jRoot.getPackageFragment(packageName)
-					.getCompilationUnit(className + ".java");
+			IPackageFragment fragment = jRoot.getPackageFragment(packageName);
+			if( ! fragment.exists() ) {
+				((IFolder)fragment.getResource()).create(true, true, null);
+			}
+			ICompilationUnit u = fragment.getCompilationUnit(className + ".java");
 			IFile f = (IFile) u.getResource();
 			ByteArrayInputStream in = new ByteArrayInputStream(new String(
 					"public class " + className + " {\n}").getBytes());

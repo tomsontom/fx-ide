@@ -14,7 +14,7 @@
 
 define("editor/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 
-/*	var JS_KEYWORDS =
+	var JS_KEYWORDS =
 		["break",
 		 "case", "class", "catch", "continue", "const", 
 		 "debugger", "default", "delete", "do",
@@ -31,7 +31,6 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "var", "void",
 		 "while", "with",
 		 "yield"];
-*/
 
 	var JAVA_KEYWORDS =
 		["abstract",
@@ -50,7 +49,6 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "void", "volatile",
 		 "while"];
 
-/*
 	var CSS_KEYWORDS =
 		["alignment-adjust", "alignment-baseline", "animation", "animation-delay", "animation-direction", "animation-duration",
 		 "animation-iteration-count", "animation-name", "animation-play-state", "animation-timing-function", "appearance",
@@ -90,21 +88,24 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		 "voice-pitch", "voice-pitch-range", "voice-rate", "voice-stress", "voice-volume", "volume", "white-space", "white-space-collapse",
 		 "widows", "width", "word-break", "word-spacing", "word-wrap", "z-index"
 		];
-*/
+
 	// Scanner constants
 	var UNKOWN = 1;
 	var KEYWORD = 2;
 	var NUMBER = 3;
 	var STRING = 4;
-	var SINGLELINE_COMMENT = 5;
-	var MULTILINE_COMMENT = 6;
-	var DOC_COMMENT = 7;
-	var WHITE = 8;
-	var WHITE_TAB = 9;
-	var WHITE_SPACE = 10;
-	var HTML_MARKUP = 11;
-	var DOC_TAG = 12;
-	var TASK_TAG = 13;
+	var MULTILINE_STRING = 5;
+	var SINGLELINE_COMMENT = 6;
+	var MULTILINE_COMMENT = 7;
+	var DOC_COMMENT = 8;
+	var WHITE = 9;
+	var WHITE_TAB = 10;
+	var WHITE_SPACE = 11;
+	var HTML_MARKUP = 12;
+	var DOC_TAG = 13;
+	var TASK_TAG = 14;
+	
+	var BRACKETS = "{}()[]<>";
 
 	// Styles 
 	var singleCommentStyle = {styleClass: "token_singleline_comment"};
@@ -119,6 +120,14 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 	var spaceStyle = {styleClass: "token_space"};
 	var tabStyle = {styleClass: "token_tab"};
 	var caretLineStyle = {styleClass: "line_caret"};
+	
+	var rulerStyle = {styleClass:"ruler"};
+	var rulerAnnotationsStyle = {styleCLass:"ruler.annotations"};
+	var rulerFoldingStyle = {styleClass:"ruler.lines"};
+	var rulerOverviewStyle = {styleClass:"ruler.overview"};
+	var rulerLinesStyle = {styleCLass:"rulerLines"};
+	var rulerLinesEvenStyle = {styleClass:"rulerLines.even"};
+	var rulerLinesOddStyle = {styleClass:"rulerLines.odd"};
 	
 	function Scanner (keywords, whitespacesVisible) {
 		this.keywords = keywords;
@@ -164,7 +173,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 				default:
 					var isCSS = this.isCSS;
 					var off = this.offset - 1;
-					if (48 <= c && c <= 57) {
+					if (!isCSS && 48 <= c && c <= 57) {
 						var floating = false, exponential = false, hex = false, firstC = c;
 						do {
 							c = this._read();
@@ -214,7 +223,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		nextToken: function() {
 			this.startOffset = this.offset;
 			while (true) {
-				var c = this._read();
+				var c = this._read(), result;
 				switch (c) {
 					case -1: return null;
 					case 47:	// SLASH -> comment
@@ -253,35 +262,57 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 						this._unread(c);
 						return UNKOWN;
 					case 39:	// SINGLE QUOTE -> char const
+						result = STRING;
 						while(true) {
 							c = this._read();
 							switch (c) {
 								case 39:
-									return STRING;
+									return result;
 								case 13:
 								case 10:
 								case -1:
 									this._unread(c);
-									return STRING;
+									return result;
 								case 92: // BACKSLASH
 									c = this._read();
+									switch (c) {
+										case 10: result = MULTILINE_STRING; break;
+										case 13:
+											result = MULTILINE_STRING;
+											c = this._read();
+											if (c !== 10) {
+												this._unread(c);
+											}
+											break;
+									}
 									break;
 							}
 						}
 						break;
 					case 34:	// DOUBLE QUOTE -> string
+						result = STRING;
 						while(true) {
 							c = this._read();
 							switch (c) {
 								case 34: // DOUBLE QUOTE
-									return STRING;
+									return result;
 								case 13:
 								case 10:
 								case -1:
 									this._unread(c);
-									return STRING;
+									return result;
 								case 92: // BACKSLASH
 									c = this._read();
+									switch (c) {
+										case 10: result = MULTILINE_STRING; break;
+										case 13:
+											result = MULTILINE_STRING;
+											c = this._read();
+											if (c !== 10) {
+												this._unread(c);
+											}
+											break;
+									}
 									break;
 							}
 						}
@@ -418,8 +449,8 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 		var keywords = [];
 		switch (lang) {
 			case "java": keywords = JAVA_KEYWORDS; break;
-//			case "js": keywords = JS_KEYWORDS; break;
-//			case "css": keywords = CSS_KEYWORDS; break;
+			case "js": keywords = JS_KEYWORDS; break;
+			case "css": keywords = CSS_KEYWORDS; break;
 		}
 		this.whitespacesVisible = false;
 		this.detectHyperlinks = true;
@@ -450,17 +481,19 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			onLineStyle: function(e) {
 				self._onLineStyle(e);
 			},
+			onMouseDown: function(e) {
+				self._onMouseDown(e);
+			},
 			onSelection: function(e) {
 				self._onSelection(e);
 			}
 		};
 		var model = view.getModel();
 		if (model.getBaseModel) {
-			model.getBaseModel().addEventListener("Changed", this._listener.onChanged);
-		} else {
-			//TODO still needed to keep the event order correct (styler before view)
-			view.addEventListener("ModelChanged", this._listener.onChanged);
+			model = model.getBaseModel();
 		}
+		model.addEventListener("Changed", this._listener.onChanged);
+		view.addEventListener("MouseDown", this._listener.onMouseDown);
 		view.addEventListener("Selection", this._listener.onSelection);
 		view.addEventListener("Destroy", this._listener.onDestroy);
 		view.addEventListener("LineStyle", this._listener.onLineStyle);
@@ -472,6 +505,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 	TextStyler.prototype = {
 		getClassNameForToken: function(token) {
 			switch (token) {
+			
 				case "singleLineComment": return singleCommentStyle.styleClass;
 				case "multiLineComment": return multiCommentStyle.styleClass;
 				case "docComment": return docCommentStyle.styleClass;
@@ -484,6 +518,14 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 				case "space": return spaceStyle.styleClass;
 				case "tab": return tabStyle.styleClass;
 				case "caretLine": return caretLineStyle.styleClass;
+				
+				case "rulerStyle": return rulerStyle.styleClass;
+				case "annotationsStyle": return rulerAnnotationsStyle.styleClass;
+				case "rulerFolding": return rulerLinesStyle.styleClass;
+				case "rulerOverview": return rulerOverviewStyle.styleClass;
+				case "rulerLines": return rulerLinesStyle.styleClass;
+				case "rulerLinesEven": return rulerLinesEvenStyle.styleClass;
+				case "rulerLinesOdd": return rulerLinesOddStyle.styleClass;
 			}
 			return null;
 		},
@@ -492,10 +534,10 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			if (view) {
 				var model = view.getModel();
 				if (model.getBaseModel) {
-					model.getBaseModel().removeEventListener("Changed", this._listener.onChanged);
-				} else {
-					view.removeEventListener("ModelChanged", this._listener.onChanged);
+					model = model.getBaseModel();
 				}
+				model.removeEventListener("Changed", this._listener.onChanged);
+				view.removeEventListener("MouseDown", this._listener.onMouseDown);
 				view.removeEventListener("Selection", this._listener.onSelection);
 				view.removeEventListener("Destroy", this._listener.onDestroy);
 				view.removeEventListener("LineStyle", this._listener.onLineStyle);
@@ -630,13 +672,20 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
-				var style = comments[i].type === DOC_COMMENT ? docCommentStyle : multiCommentStyle;
-				if (this.whitespacesVisible || this.detectHyperlinks) {
-					var s = Math.max(offset, commentStart);
-					var e = Math.min(end, commentEnd);
-					this._parseComment(text.substring(s - start, e - start), s, styles, style, comments[i].type);
+				var type = comments[i].type, style;
+				switch (type) {
+					case DOC_COMMENT: style = docCommentStyle; break;
+					case MULTILINE_COMMENT: style = multiCommentStyle; break;
+					case MULTILINE_STRING: style = stringStyle; break;
+				}
+				var s = Math.max(offset, commentStart);
+				var e = Math.min(end, commentEnd);
+				if ((type === DOC_COMMENT || type === MULTILINE_COMMENT) && (this.whitespacesVisible || this.detectHyperlinks)) {
+					this._parseComment(text.substring(s - start, e - start), s, styles, style, type);
+				} else if (type === MULTILINE_STRING && this.whitespacesVisible) {
+					this._parseString(text.substring(s - start, e - start), s, styles, stringStyle);
 				} else {
-					styles.push({start: commentStart, end: commentEnd, style: style});
+					styles.push({start: s, end: e, style: style});
 				}
 				offset = commentEnd;
 			}
@@ -662,6 +711,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 				switch (token) {
 					case KEYWORD: style = keywordStyle; break;
 					case NUMBER: style = numberStyle; break;
+					case MULTILINE_STRING:
 					case STRING:
 						if (this.whitespacesVisible) {
 							this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
@@ -809,17 +859,14 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			scanner.setText(text);
 			var result = [];
 			while ((token = scanner.nextToken())) {
-				if (token === MULTILINE_COMMENT || token === DOC_COMMENT) {
-					var comment = {
+				if (token === MULTILINE_COMMENT || token === DOC_COMMENT || token === MULTILINE_STRING) {
+					result.push({
 						start: scanner.getStartOffset() + offset,
 						end: scanner.getOffset() + offset,
 						type: token
-					};
-					result.push(comment);
-					//TODO can we avoid this work if edition does not overlap comment?
-					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
+					});
 				}
-				if (token === SINGLELINE_COMMENT) {
+				if (token === SINGLELINE_COMMENT || token === MULTILINE_COMMENT || token === DOC_COMMENT) {
 					//TODO can we avoid this work if edition does not overlap comment?
 					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
 				}
@@ -827,7 +874,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			return result;
 		}, 
 		_findMatchingBracket: function(model, offset) {
-			var brackets = "{}()[]<>";
+			var brackets = BRACKETS;
 			var bracket = model.getText(offset, offset + 1);
 			var bracketIndex = brackets.indexOf(bracket, 0);
 			if (bracketIndex === -1) { return -1; }
@@ -844,7 +891,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
 			for (var i=0; i<brackets.length; i++) {
 				var sign = brackets[i] >= 0 ? 1 : -1;
-				if (brackets[i] * sign === offset) {
+				if (brackets[i] * sign - 1 === offset) {
 					var level = 1;
 					if (bracketIndex & 1) {
 						i--;
@@ -852,7 +899,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex -= 1;
@@ -865,7 +912,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 								sign = brackets[j] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[j] * sign;
+									return brackets[j] * sign - 1;
 								}
 							}
 							lineIndex--;
@@ -876,7 +923,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex += 1;
@@ -890,7 +937,7 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 								sign = brackets[k] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[k] * sign;
+									return brackets[k] * sign - 1;
 								}
 							}
 							lineIndex++;
@@ -916,9 +963,9 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 					scanner.setText(text.substring(offset - start, commentStart - start));
 					while ((token = scanner.nextToken())) {
 						if (token === bracketToken) {
-							result.push(scanner.getStartOffset() + offset - start + textOffset);
+							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 						} else if (token === closingBracketToken) {
-							result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 						}
 					}
 				}
@@ -928,9 +975,9 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 				scanner.setText(text.substring(offset - start, end - start));
 				while ((token = scanner.nextToken())) {
 					if (token === bracketToken) {
-						result.push(scanner.getStartOffset() + offset - start + textOffset);
+						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 					} else if (token === closingBracketToken) {
-						result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 					}
 				}
 			}
@@ -983,6 +1030,33 @@ define("editor/textview/textStyler", ['orion/textview/annotations'], function(mA
 			}
 			this._bracketAnnotations = add;
 			this.annotationModel.replaceAnnotations(remove, add);
+		},
+		_onMouseDown: function(e) {
+			if (e.clickCount !== 2) { return; }
+			var view = this.view;
+			var model = view.getModel();
+			var offset = view.getOffsetAtLocation(e.x, e.y);
+			if (offset > 0) {
+				var mapOffset = offset - 1;
+				var baseModel = model;
+				if (model.getBaseModel) {
+					mapOffset = model.mapOffset(mapOffset);
+					baseModel = model.getBaseModel();
+				}
+				var bracket = this._findMatchingBracket(baseModel, mapOffset);
+				if (bracket !== -1) {
+					e.preventDefault();
+					var mapBracket = bracket;
+					if (model.getBaseModel) {
+						mapBracket = model.mapOffset(mapBracket, true);
+					}
+					if (offset > mapBracket) {
+						offset--;
+						mapBracket++;
+					}	
+					view.setSelection(mapBracket, offset);
+				}
+			}
 		},
 		_onModelChanged: function(e) {
 			var start = e.start;

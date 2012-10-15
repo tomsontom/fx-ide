@@ -33,9 +33,9 @@ public class ContentAssistImpl implements ContentAssist {
 				b.append(",\n");
 			}
 			String v = p.value;
-			if( prefix.length() > 0 ) {
-				v = v.substring(prefix.length());
-			}
+//			if( prefix.length() > 0 ) {
+//				v = v.substring(prefix.length());
+//			}
 			
 			b.append("	{ ");
 			b.append("\"proposal\": \""+v+"\" ");
@@ -57,6 +57,8 @@ public class ContentAssistImpl implements ContentAssist {
 			if( p.type == Type.METHOD ) {
 				b.append(",\"escapePosition\": "+(offset+v.length()-1)+" ");	
 			}
+			b.append(", \"style\": \"html\"");
+			b.append(", \"replace\":  true");
 			
 			b.append("}");
 			flag = true;

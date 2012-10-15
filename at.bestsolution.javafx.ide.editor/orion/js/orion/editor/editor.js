@@ -12,10 +12,10 @@
  /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/i18nUtil'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, i18nUtil) {
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/i18nUtil'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, i18nUtil) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var Animation;
 	
-	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
+	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
 	/**
 	 * @name orion.editor.Editor
@@ -199,12 +199,12 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Sets whether the editor is dirty.
 		 *
-		 * @param {Boollean} dirty
+		 * @param {Boolean} dirty
 		 */
 		setDirty: function(dirty) {
 			if (this._dirty === dirty) { return; }
 			this._dirty = dirty;
-			this.onDirtyChanged({type: "DirtyChanged"});
+			this.onDirtyChanged({type: "DirtyChanged"}); //$NON-NLS-0$
 		},
 		/**
 		 * Sets whether the line numbering ruler is visible.
@@ -393,7 +393,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			if (this._statusReporter) {
 				this._statusReporter(message, type, isAccessible);
 			} else {
-				window.alert(type === "error" ? "ERROR: " + message : message);
+				window.alert(type === "error" ? "ERROR: " + message : message); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
@@ -415,10 +415,10 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 			}
 			if (rangeAnnotations.length === 0) { return null; }
-			var pt = textView.convert({x: x, y: y}, "document", "page");
+			var pt = textView.convert({x: x, y: y}, "document", "page"); //$NON-NLS-1$ //$NON-NLS-0$
 			var info = {
 				contents: rangeAnnotations,
-				anchor: "left",
+				anchor: "left", //$NON-NLS-0$
 				x: pt.x + 10,
 				y: pt.y + 20
 			};
@@ -435,41 +435,25 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			var lineIndex = model.getLineAtOffset(newSelection.start);
 			var newEmpty = newSelection.start === newSelection.end;
 			var oldEmpty = !oldSelection || oldSelection.start === oldSelection.end;
-			if (!(oldLineIndex === lineIndex && oldEmpty && newEmpty)) {
-				var remove = this._currentLineAnnotation ? [this._currentLineAnnotation] : null;
-				this._currentLineAnnotation = null;
-				var add;
-				if (newEmpty) {
-					var start = model.getLineStart(lineIndex);
-					var end = model.getLineEnd(lineIndex);
-					if (model.getBaseModel) {
-						start = model.mapOffset(start);
-						end = model.mapOffset(end);
-					}
-					var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
-					this._currentLineAnnotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
-					add = [this._currentLineAnnotation];
-				}
-				annotationModel.replaceAnnotations(remove, add);
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex);
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
 			}
-		},
-		
-		highlightAnnotations: function() {
-			if (this._annotationStyler) {
-				this._annotationStyler.destroy();
-				this._annotationStyler = null;
+			var annotation = this._currentLineAnnotation; 
+			if (oldLineIndex === lineIndex && oldEmpty && newEmpty && annotation && annotation.start === start && annotation.end === end) {
+				return;
 			}
-			if (this._annotationFactory) {
-				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
-				this._annotationStyler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
+			var remove = annotation ? [annotation] : null;
+			var add;
+			if (newEmpty) {
+				var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
+				annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
+				add = [annotation];
 			}
+			this._currentLineAnnotation = annotation;
+			annotationModel.replaceAnnotations(remove, add);
 		},
 		
 		/**
@@ -521,11 +505,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					self._highlightCurrentLine(e.newValue, e.oldValue);
 				}
 			};
-			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
-			textView.addEventListener("Selection", this._listener.onSelection);
-			textView.addEventListener("MouseOver", this._listener.onMouseOver);
-			textView.addEventListener("MouseOut", this._listener.onMouseOut);
-			textView.addEventListener("MouseMove", this._listener.onMouseMove);
+			textView.addEventListener("ModelChanged", this._listener.onModelChanged); //$NON-NLS-0$
+			textView.addEventListener("Selection", this._listener.onSelection); //$NON-NLS-0$
+			textView.addEventListener("MouseOver", this._listener.onMouseOver); //$NON-NLS-0$
+			textView.addEventListener("MouseOut", this._listener.onMouseOut); //$NON-NLS-0$
+			textView.addEventListener("MouseMove", this._listener.onMouseMove); //$NON-NLS-0$
 						
 			// Set up keybindings
 			if (this._keyBindingFactory) {
@@ -533,8 +517,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
-			textView.setAction("Cancel Current Mode", function() {
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "cancelMode"); //$NON-NLS-0$
+			textView.setAction("cancelMode", function() { //$NON-NLS-0$
 				// loop through all modes in case multiple modes are active.  Keep track of whether we processed the key.
 				var keyUsed = false;
 				for (var i=0; i<this._keyModes.length; i++) {
@@ -543,9 +527,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					}
 				}
 				return keyUsed;
-			}.bind(this));
+			}.bind(this), {name: messages.cancelMode});
 
-			textView.setAction("lineUp", function() {
+			textView.setAction("lineUp", function() { //$NON-NLS-0$
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineUp();
@@ -553,7 +537,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 				return false;
 			}.bind(this));
-			textView.setAction("lineDown", function() {
+			textView.setAction("lineDown", function() { //$NON-NLS-0$
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].lineDown();
@@ -562,7 +546,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				return false;
 			}.bind(this));
 
-			textView.setAction("enter", function() {
+			textView.setAction("enter", function() { //$NON-NLS-0$
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].enter();
@@ -570,12 +554,51 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 				return false;
 			}.bind(this));
-			
-			// Create rulers
+
+			var addRemoveBookmark = function(lineIndex, e) {
+				if (lineIndex === undefined) { return; }
+				if (lineIndex === -1) { return; }
+				var view = this.getView();
+				var viewModel = view.getModel();
+				var annotationModel = this.getAnnotationModel();
+				var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
+				var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
+				var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
+				var bookmark = null;
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) {
+						bookmark = annotation;
+						break;
+					}
+				}
+				if (bookmark) {
+					annotationModel.removeAnnotation(bookmark);
+				} else {
+					bookmark = mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK, lineStart, lineEnd);
+					bookmark.title = undefined;
+					annotationModel.addAnnotation(bookmark);
+				}
+			};
+
+			// Create rulers, annotation model and styler
 			if (this._annotationFactory) {
 				var textModel = textView.getModel();
 				if (textModel.getBaseModel) { textModel = textModel.getBaseModel(); }
 				this._annotationModel = this._annotationFactory.createAnnotationModel(textModel);
+				if (this._annotationModel) {
+					var styler = this._annotationStyler = this._annotationFactory.createAnnotationStyler(textView, this._annotationModel);
+					if (styler) {
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
+					}
+				}
 				
 				/*
 				* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
@@ -590,7 +613,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.onClick = function(lineIndex, e) {
 						if (lineIndex === undefined) { return; }
 						if (lineIndex === -1) { return; }
-						var viewModel = textView.getModel();
+						var view = this.getView();
+						var viewModel = view.getModel();
 						var annotationModel = this.getAnnotationModel();
 						var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
 						var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
@@ -603,10 +627,12 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 							break;
 						}
 					};
-					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
+					ruler.onDblClick = addRemoveBookmark;
+					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
 				}
 				this.setAnnotationRulerVisible(true);
 					
@@ -622,6 +648,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
@@ -631,6 +658,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
+				this._lineNumberRuler.onDblClick = addRemoveBookmark;
 				this.setLineNumberRulerVisible(true);
 			}
 			
@@ -641,7 +669,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			
 			var textViewInstalledEvent = {
-				type: "TextViewInstalled",
+				type: "TextViewInstalled", //$NON-NLS-0$
 				textView: textView
 			};
 			this.dispatchEvent(textViewInstalledEvent);
@@ -682,12 +710,11 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					var problem = problems[i];
 					if (problem) {
 						// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-						// TODO safeText() from util.js
-						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;');
+						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;'); //$NON-NLS-1$ //$NON-NLS-0$
 						var lineIndex = problem.line - 1;
 						var lineStart = model.getLineStart(lineIndex);
 						var severity = problem.severity;
-						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING;
+						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING; //$NON-NLS-0$
 						var start = lineStart + problem.start - 1;
 						var end = lineStart + problem.end;
 						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
@@ -708,18 +735,18 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		 */
 		showSelection: function(start, end, line, offset, length) {
 			// We use typeof because we need to distinguish the number 0 from an undefined or null parameter
-			if (typeof(start) === "number") {
-				if (typeof(end) !== "number") {
+			if (typeof(start) === "number") { //$NON-NLS-0$
+				if (typeof(end) !== "number") { //$NON-NLS-0$
 					end = start;
 				}
 				this.moveSelection(start, end);
-			} else if (typeof(line) === "number") {
+			} else if (typeof(line) === "number") { //$NON-NLS-0$
 				var model = this.getModel();
 				var pos = model.getLineStart(line-1);
-				if (typeof(offset) === "number") {
+				if (typeof(offset) === "number") { //$NON-NLS-0$
 					pos = pos + offset;
 				}
-				if (typeof(length) !== "number") {
+				if (typeof(length) !== "number") { //$NON-NLS-0$
 					length = 0;
 				}
 				this.moveSelection(pos, pos+length);
@@ -747,7 +774,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					} else {
 						if (contents !== null && contents !== undefined) {
 							this._textView.setText(contents);
-							this._textView.getModel().setLineDelimiter("auto");
+							this._textView.getModel().setLineDelimiter("auto"); //$NON-NLS-0$
 							this._highlightCurrentLine(this._textView.getSelection());
 						}
 					}
@@ -757,7 +784,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 			}
 			this.onInputChanged({
-				type: "InputChanged",
+				type: "InputChanged", //$NON-NLS-0$
 				title: title,
 				message: message,
 				contents: contents,
@@ -786,7 +813,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				if (end === undefined) {
 					end = 0;
 				}
-				if (typeof column === "string") {
+				if (typeof column === "string") { //$NON-NLS-0$
 					var index = model.getLine(line).indexOf(column);
 					if (index !== -1) {
 						start = index;
@@ -835,8 +862,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		 * @name play
 		 */
 		Animation.prototype.play = function() {
-			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350,
-			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20,
+			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350, //$NON-NLS-0$
+			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20, //$NON-NLS-0$
 			    easing = this.options.easing || this.defaultEasing,
 			    onAnimate = this.options.onAnimate || function() {},
 			    onEnd = this.options.onEnd || function () {},

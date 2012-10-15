@@ -13,11 +13,17 @@
 
 //NLS_CHARSET=UTF-8
 
+/*global define*/
+
 define({
 	"Comment": "Comment",
+	"Flat outline": "Flat outline",
 	"incrementalFind": "Incremental find: ${0}",
 	"incrementalFindNotFound": "Incremental find: ${0} (not found)",
 	"find": "Find...",
+	"undo": "Undo",
+	"redo": "Redo",
+	"cancelMode": "Cancel Current Mode",
 	"findNext": "Find Next Occurrence",
 	"findPrevious": "Find Previous Occurrence",
 	"incrementalFindKey": "Incremental Find",
@@ -32,6 +38,10 @@ define({
 	"gotoLinePrompty": "Goto Line:",
 	"nextAnnotation": "Next Annotation",
 	"prevAnnotation": "Previous Annotation",
+	"expand": "Expand",
+	"collapse": "Collapse",
+	"expandAll": "Expand All", 
+	"collapseAll": "Collapse All",
 	"lastEdit": "Last Edit Location",
 	"toggleLineComment": "Toggle Line Comment",
 	"addBlockComment": "Add Block Comment",

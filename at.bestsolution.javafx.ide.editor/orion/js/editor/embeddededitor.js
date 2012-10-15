@@ -1,13 +1,15 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2012 VMware, Inc.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
- * Contributors:
+ * Contributors: 
  *     IBM Corporation - initial API and implementation
+ *     Andrew Eisenberg - rename jsContentAssist to jsTemplateContentAssist
  *******************************************************************************/
 /*global examples orion:true window define*/
 /*jslint browser:true devel:true*/
@@ -22,12 +24,9 @@ define([
 	"orion/editor/editor",
 	"orion/editor/editorFeatures",
 	"orion/editor/contentAssist",
-	"orion/editor/jsContentAssist",
-	"orion/editor/cssContentAssist",
 	"orion/editor/javaContentAssist"],
 
-function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist, mJavaContentAssist){
-	
+function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJavaContentAssist){
 	var editorDomNode = document.getElementById("editor");
 	
 	var textViewFactory = function() {
@@ -41,12 +40,11 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var contentAssistFactory = {
 		createContentAssistMode: function(editor) {
 			contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-			var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist");
+			var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist);
 			return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
 		}
 	};
-	var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
-	var jsContentAssistProvider = new mJSContentAssist.JavaScriptContentAssistProvider();
+	
 	var javaContentAssistProvider = new mJavaContentAssist.JavaContentAssistProvider();
 	
 	// Canned highlighters for js, java, and css. Grammar-based highlighter for html
@@ -83,7 +81,9 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 
 	/*function save(editor) {
 		editor.setInput(null, null, null, true);
-		window.alert("Save hook.");
+		setTimeout(function() {
+			window.alert("Save hook.");
+		}, 0);
 	}*/
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
@@ -105,6 +105,10 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 				}
 				return true;
 		});
+		
+		// speaking of save...
+		// document.getElementById("save").onclick = function() {save(editor);};
+
 	};
 		
 	var dirtyIndicator = "";
@@ -145,11 +149,9 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 			editor.__javaObject._js_Event("DirtyChanged", "Event", evt);
 		}
 		
-		alert("Dirty changes: " + editor.__javaObject);
+		// alert("Dirty changes: " + editor.__javaObject);
 		// document.getElementById("status").innerHTML = dirtyIndicator + status;
 	});
-	
-	
 	
 	editor.installTextView();
 	
@@ -169,15 +171,8 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
 	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
-	editor.highlightAnnotations();
 	contentAssist.addEventListener("Activating", function() {
-		if (/\.css$/.test(contentName)) {
-			contentAssist.setProviders([cssContentAssistProvider]);
-		} else if (/\.js$/.test(contentName)) {
-			contentAssist.setProviders([jsContentAssistProvider]);
-		} else {
-			contentAssist.setProviders([javaContentAssistProvider]);
-		}
+		contentAssist.setProviders([javaContentAssistProvider]);
 	});
 	// end of code to run when content changes.
 	
