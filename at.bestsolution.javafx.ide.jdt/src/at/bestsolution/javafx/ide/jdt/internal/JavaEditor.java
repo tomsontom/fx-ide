@@ -70,20 +70,6 @@ public class JavaEditor {
 						public void accept(CompletionProposal proposal) {
 							String completion = new String(proposal.getCompletion());
 							
-//							IType ownerType = null;
-//							String sType = new String(proposal.getDeclarationSignature());
-//							sType = Signature.toString(sType);
-//							try {
-//								ownerType = project.findType(Signature.toQualifiedName(unitType.resolveType(sType)[0]));
-//							} catch (Exception e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//							
-//							if( ownerType == null ) {
-//								return;
-//							}
-							
 							if( ! Flags.isPublic(proposal.getFlags()) ) {
 								return;
 							}
