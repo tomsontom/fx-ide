@@ -42,31 +42,72 @@ public class ContentAssistImpl implements ContentAssist {
 			
 			String description = "";
 			
+//			if( p.type == Type.TYPE ) {
+//				description = "<div class='content-item class-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+//			} else if(p.type == Type.METHOD) {
+//				description = "<div class='content-item method-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+//			} else if(p.type == Type.METHOD) {
+//				description = "<div class='content-item field-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+//			} else {
+//				description = toHTML(p.description);
+//			}
+			
 			if( p.type == Type.TYPE ) {
-				description = "<div class='content-item class-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+				description = "{ \"styleClass\": \"content-item class-item\",  \"segments\": " + toJSON(p.description) + "}";
 			} else if(p.type == Type.METHOD) {
-				description = "<div class='content-item method-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+				description = "{ \"styleClass\": \"content-item method-item\",  \"segments\": " + toJSON(p.description) + "}";
 			} else if(p.type == Type.METHOD) {
-				description = "<div class='content-item field-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
+				description = "{ \"styleClass\": \"content-item field-item\",  \"segments\": " + toJSON(p.description) + "}";
 			} else {
-				description = toHTML(p.description);
+				description = "{ \"segments\": " + toJSON(p.description) + "}";
 			}
 			
-			
-			b.append(",\"description\": \""+description+"\" ");
+			b.append(",\"description\":  "+description+" ");
 			if( p.type == Type.METHOD ) {
 				b.append(",\"escapePosition\": "+(offset+v.length()-1)+" ");	
 			}
-			b.append(", \"style\": \"html\"");
+			b.append(", \"style\": \"attributedString\"");
 			b.append(", \"replace\":  true");
 			
 			b.append("}");
 			flag = true;
 		}
 		b.append("]");
+		
+		System.err.println(b.toString()); 
 		return b.toString();
 	}
 
+	private static String toJSON(StyledString s) {
+		StringBuilder b = new StringBuilder();
+		b.append("[");
+		boolean flag = false;
+		for( Segment segment : s.getList() ) {
+			if( flag ) {
+				b.append(",");
+			}
+			b.append("{");
+			b.append("\"value\":\"" +segment.value+"\"");
+			if( segment.style != null ) {
+				b.append(", \"style\": {");
+				b.append("\"bold\":  " + segment.style.bold + " ");
+				b.append(", \"italic\": " + segment.style.italic + " ");
+				if(segment.style.color != null) {
+					b.append(", \"color\":\"" + segment.style.color + "\"");
+				}
+				if(segment.style.fontname != null) {
+					b.append(", \"fontname\":\"" + segment.style.fontname + "\"");
+				}
+				b.append("");
+				b.append("}");
+			}
+			b.append("}");
+			flag = true;
+		}
+		b.append("]");
+		return b.toString();
+	}
+	
 	private static String toHTML(StyledString s) {
 		StringBuilder b = new StringBuilder();
 		b.append("<span>");
@@ -77,11 +118,17 @@ public class ContentAssistImpl implements ContentAssist {
 				String styleString = "";
 				if( segment.style.bold ) {
 					styleString += "font-weight: bold;";
-				} else if(segment.style.italic) {
+				}
+				
+				if(segment.style.italic) {
 					styleString += "font-style: italic;";
-				} else if(segment.style.color != null) {
+				}
+				
+				if(segment.style.color != null) {
 					styleString += "color: " + segment.style.color + ";";
-				} else if(segment.style.fontname != null) {
+				}
+				
+				if(segment.style.fontname != null) {
 					styleString += "font-name: " + segment.style.fontname + ";";
 				}
 				b.append("<span style='"+styleString+"'>"+segment.value+"</span>");
