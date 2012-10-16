@@ -11,15 +11,20 @@
 package at.bestsolution.javafx.ide.editor.orion.editor.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.scene.web.WebEngine;
 
 import netscape.javascript.JSObject;
+import at.bestsolution.javafx.ide.editor.ProblemMarker;
+import at.bestsolution.javafx.ide.editor.ProblemMarker.Type;
 import at.bestsolution.javafx.ide.editor.orion.editor.Editor;
+import at.bestsolution.javafx.ide.editor.orion.editor.Util;
 import at.bestsolution.javafx.ide.editor.orion.textview.TextView;
 import at.bestsolution.javafx.ide.editor.orion.textview.impl.TextViewImpl;
 
+@SuppressWarnings("restriction")
 public class EditorImpl extends NativeObjectWrapper implements Editor {
 	private Map<String, Runnable> actionSet = new HashMap<>();
 	
@@ -56,6 +61,36 @@ public class EditorImpl extends NativeObjectWrapper implements Editor {
 //		System.err.println("Status-Report: " + message + " => " + error);
 	}
 
+	@Override
+	public void showProblems(List<ProblemMarker> markers) {
+		JSObject o = (JSObject) e.executeScript("JSON.parse('"+toJSON(markers)+"')");
+//		JSObject o = (JSObject) e.executeScript(toJSON(markers));
+		getJSObject().call("showProblems", o);
+	}
+	
+	public String toJSON(List<ProblemMarker> markers) {
+		StringBuilder b = new StringBuilder();
+		boolean flag = false;
+		b.append("[");
+		for( ProblemMarker m : markers ) {
+			if( flag ) {
+				b.append(",");
+			}
+			b.append("{");
+			b.append("\"description\":\"" + Util.escapeForJSON(m.description) + "\"");
+			b.append(",\"line\": " + m.linenumber);
+			b.append(",\"severity\": \""+(m.type == Type.ERROR?"error":"warning")+"\"");
+			b.append(",\"start\":  " + m.startCol);
+			 b.append(",\"end\":  " +  m.endCol);
+			b.append("}");
+			
+			flag = true;
+		}
+		b.append("]");
+		System.err.println(" =========> " + b);
+		return b.toString();
+	}
+	
 	@Override
 	public boolean isDirty() {
 		Object o = getJSObject().call("isDirty");

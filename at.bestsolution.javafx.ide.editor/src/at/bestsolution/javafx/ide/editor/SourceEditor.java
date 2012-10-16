@@ -10,6 +10,7 @@
  *******************************************************************************/
 package at.bestsolution.javafx.ide.editor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,7 +25,6 @@ import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import netscape.javascript.JSObject;
-import at.bestsolution.javafx.ide.editor.ContentProposalComputer.Proposal;
 import at.bestsolution.javafx.ide.editor.js.JavaScriptNCICallback;
 import at.bestsolution.javafx.ide.editor.orion.editor.Editor;
 import at.bestsolution.javafx.ide.editor.orion.editor.impl.ContentAssistImpl;
@@ -38,6 +38,7 @@ public class SourceEditor extends BorderPane {
 	private Document document;
 	private Runnable runnable;
 	private ContentProposalComputer computer;
+	private List<ProblemMarker> markers = new ArrayList<ProblemMarker>();
 	
 	public SourceEditor() {
 		this.webView = new WebView();
@@ -87,14 +88,22 @@ public class SourceEditor extends BorderPane {
 			
 			@Override
 			public void handle(WebEvent<String> event) {
-//				System.err.println("This is an alert: " + event);
+				System.err.println("This is an alert: " + event);
 			}
 		});
 		setCenter(webView);
 	}
 	
-	void initContentAssist(Object o) {
-		System.err.println(o);
+//	void initContentAssist(Object o) {
+//		System.err.println(o);
+//	}
+
+	public void setProblemMarkers(List<ProblemMarker> markers) {
+		this.markers.clear();
+		this.markers.addAll(markers);
+		if(  editor != null ) {
+			editor.showProblems(this.markers);	
+		}
 	}
 	
 	void initEditor(final Editor editor) { 
@@ -128,6 +137,9 @@ public class SourceEditor extends BorderPane {
 				}
 			}
 		});
+		if( !this.markers.isEmpty() ) {
+			this.editor.showProblems(markers);
+		}
 	}
 	
 	public void setContentProposalComputer(ContentProposalComputer computer) {
