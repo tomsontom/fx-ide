@@ -103,8 +103,6 @@ public class JavaEditor {
 					int startCol = problem.getSourceStart();
 					int endCol = problem.getSourceEnd();
 					
-					System.err.println(startCol + "/" + endCol);
-					
 					if( c != null ) {
 						startCol = c.getColumnNumber(startCol);
 						endCol = c.getColumnNumber(endCol) ;
