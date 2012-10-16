@@ -59,6 +59,7 @@ public class JavaEditor {
 					int offset) {
 				final List<Proposal> l = new ArrayList<ContentProposalComputer.Proposal>();
 				
+				//TODO We should open the working copy on open the then always update the buffer!!!
 				ICompilationUnit unit = (ICompilationUnit) JavaCore.create(fsInput.getFile());
 				final IType unitType = unit.findPrimaryType();
 				try {
