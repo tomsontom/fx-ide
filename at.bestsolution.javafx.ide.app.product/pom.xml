@@ -8,7 +8,7 @@
 		<groupId>at.bestsolution.javafx.ide</groupId>
 		<artifactId>releng</artifactId>
 		<relativePath>../at.bestsolution.javafx.ide.releng/pom.xml</relativePath>
-		<version>1.0.0</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>at.bestsolution.javafx.ide.app.product</artifactId>
 	<packaging>eclipse-application</packaging>
