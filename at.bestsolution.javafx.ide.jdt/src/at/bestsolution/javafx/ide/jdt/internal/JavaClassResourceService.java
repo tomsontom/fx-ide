@@ -61,8 +61,7 @@ import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import at.bestsolution.javafx.ide.dialog.Dialog;
-import at.bestsolution.javafx.ide.dialog.TitleAreaDialog;
+import at.bestsolution.efxclipse.runtime.dialogs.TitleAreaDialog;
 import at.bestsolution.javafx.ide.services.IResourceService;
 
 public class JavaClassResourceService implements IResourceService {

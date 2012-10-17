@@ -15,18 +15,18 @@
       <plugin id="at.bestsolution.efxclipse.runtime.application"/>
       <plugin id="at.bestsolution.efxclipse.runtime.databinding"/>
       <plugin id="at.bestsolution.efxclipse.runtime.di"/>
+      <plugin id="at.bestsolution.efxclipse.runtime.dialogs"/>
       <plugin id="at.bestsolution.efxclipse.runtime.javafx"/>
       <plugin id="at.bestsolution.efxclipse.runtime.osgi" fragment="true"/>
       <plugin id="at.bestsolution.efxclipse.runtime.osgi.util"/>
+      <plugin id="at.bestsolution.efxclipse.runtime.panels"/>
       <plugin id="at.bestsolution.efxclipse.tooling.jdt.core"/>
-      <plugin id="at.bestsolution.javafx.ide.dialog"/>
       <plugin id="at.bestsolution.javafx.ide.editor"/>
       <plugin id="at.bestsolution.javafx.ide.editor.app"/>
       <plugin id="at.bestsolution.javafx.ide.jdt"/>
       <plugin id="at.bestsolution.javafx.ide.projectexplorer"/>
       <plugin id="at.bestsolution.javafx.ide.services"/>
       <plugin id="com.ibm.icu"/>
-      <plugin id="javafx.osgi"/>
       <plugin id="javax.inject"/>
       <plugin id="org.eclipse.core.contenttype"/>
       <plugin id="org.eclipse.core.databinding"/>

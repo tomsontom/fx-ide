@@ -53,7 +53,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import at.bestsolution.javafx.ide.dialog.Dialog;
+import at.bestsolution.efxclipse.runtime.dialogs.Dialog;
 import at.bestsolution.javafx.ide.projectexplorer.ProjectExplorer;
 import at.bestsolution.javafx.ide.services.FileInput;
 import at.bestsolution.javafx.ide.services.IEditorInput;
