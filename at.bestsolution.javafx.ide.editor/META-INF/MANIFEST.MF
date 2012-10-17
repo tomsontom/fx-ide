@@ -35,3 +35,4 @@ Import-Package: javafx.animation;version="2.0.0",
  netscape.javascript;version="2.0.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: at.bestsolution.javafx.ide.editor
+Eclipse-BundleShape: dir
