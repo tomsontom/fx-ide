@@ -73,6 +73,8 @@ public class EditorImpl extends NativeObjectWrapper implements Editor {
 		boolean flag = false;
 		b.append("[");
 		for( ProblemMarker m : markers ) {
+			Integer lineOffset = (Integer) ((JSObject)getJSObject().call("getModel")).call("getLineStart", m.linenumber-1); 
+			
 			if( flag ) {
 				b.append(",");
 			}
@@ -80,8 +82,8 @@ public class EditorImpl extends NativeObjectWrapper implements Editor {
 			b.append("\"description\":\"" + Util.escapeForJSON(m.description) + "\"");
 			b.append(",\"line\": " + m.linenumber);
 			b.append(",\"severity\": \""+(m.type == Type.ERROR?"error":"warning")+"\"");
-			b.append(",\"start\":  " + m.startCol);
-			 b.append(",\"end\":  " +  m.endCol);
+			b.append(",\"start\":  " + (m.startSrcPosition - lineOffset.intValue()));
+			 b.append(",\"end\":  " +  (m.endSrcPosition - lineOffset.intValue()));
 			b.append("}");
 			
 			flag = true;

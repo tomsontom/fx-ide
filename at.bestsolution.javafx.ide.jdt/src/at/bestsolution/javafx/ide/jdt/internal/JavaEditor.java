@@ -17,12 +17,7 @@ import javafx.scene.layout.BorderPane;
 
 import javax.inject.Inject;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IMarkerDelta;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
@@ -33,13 +28,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import at.bestsolution.javafx.ide.editor.ContentProposalComputer;
 import at.bestsolution.javafx.ide.editor.Document;
 import at.bestsolution.javafx.ide.editor.ProblemMarker;
 import at.bestsolution.javafx.ide.editor.SourceEditor;
+import at.bestsolution.javafx.ide.jdt.internal.jdt.FXWorkingCopyOwner;
 import at.bestsolution.javafx.ide.services.IEditorInput;
 import at.bestsolution.javafx.ide.services.IResourceFileInput;
 
@@ -47,53 +41,28 @@ public class JavaEditor {
 	private ICompilationUnit unit;
 	private SourceEditor editor;
 	
-	@SuppressWarnings("deprecation")
 	@Inject
 	public JavaEditor(BorderPane pane, IEditorInput input) {
 		editor = new SourceEditor();
 		pane.setCenter(editor);
 
 		IResourceFileInput fsInput = (IResourceFileInput) input;
-		unit = (ICompilationUnit) JavaCore.create(fsInput.getFile());
-//		unit.getResource().getWorkspace().addResourceChangeListener(new IResourceChangeListener() {
-//			
-//			@Override
-//			public void resourceChanged(IResourceChangeEvent event) {
-//				if( event.getType() == IResourceChangeEvent.POST_BUILD ) {
-//					for( IMarkerDelta d : event.findMarkerDeltas("org.eclipse.core.resources.problemmarker", true) ) {
-//						System.err.println(d);
-//					}
-//				}
-//			}
-//		});
-		
 		try {
-			unit.becomeWorkingCopy(new IProblemRequestor() {
+			unit = ((ICompilationUnit) JavaCore.create(fsInput.getFile())).getWorkingCopy(new FXWorkingCopyOwner(new IProblemRequestor() {
 				private List<ProblemMarker> l = new ArrayList<>();
-				private boolean running;
-				private CompilationUnit c;
-				
 				@Override
 				public boolean isActive() {
-					return ! running;
+					// TODO Auto-generated method stub
+					return true;
 				}
 				
 				@Override
 				public void endReporting() {
-					running = false;
 					setMarkers(l);
 				}
 				
 				@Override
 				public void beginReporting() {
-					running = true;
-					c = null; 
-					try {
-						 c = unit.reconcile(AST.JLS4, true, null, null);
-					} catch (JavaModelException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 					l.clear();
 				}
 				
@@ -103,19 +72,15 @@ public class JavaEditor {
 					int startCol = problem.getSourceStart();
 					int endCol = problem.getSourceEnd();
 					
-					if( c != null ) {
-						startCol = c.getColumnNumber(startCol);
-						endCol = c.getColumnNumber(endCol) ;
-						if( endCol == startCol ) {
-							endCol++;
-						}
+					if( endCol == startCol ) {
+						endCol++;
 					}
 					
 					String description = problem.getMessage();
 					ProblemMarker marker = new ProblemMarker( problem.isError() ? at.bestsolution.javafx.ide.editor.ProblemMarker.Type.ERROR : at.bestsolution.javafx.ide.editor.ProblemMarker.Type.WARNING, linenumber, startCol, endCol, description);
 					l.add(marker);
 				}
-			}, null);
+			}), new NullProgressMonitor());
 		} catch (JavaModelException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -189,42 +154,9 @@ public class JavaEditor {
 			}
 		});
 		
-		calculateInitialMarkers();
-	}
-	
-	void calculateInitialMarkers() {
 		try {
-			List<ProblemMarker> list = new ArrayList<>();
-			
-			CompilationUnit c = null;
-			try {
-				 c = unit.reconcile(AST.JLS4, true, null, null);
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			for( IMarker m : unit.getResource().findMarkers("org.eclipse.core.resources.problemmarker", true, IResource.DEPTH_INFINITE) ) {
-				System.err.println("INITIAL ONES");
-				int linenumber = ((Number)m.getAttribute("lineNumber")).intValue();
-				int startCol = ((Number)m.getAttribute("charStart")).intValue();
-				int endCol = ((Number)m.getAttribute("charEnd")).intValue();
-				String description = m.getAttribute("message").toString();
-				int severity = ((Number)m.getAttribute("severity")).intValue();
-				
-				if( c != null ) {
-					startCol = c.getColumnNumber(startCol);
-					endCol = c.getColumnNumber(endCol);
-				}
-				
-				if( severity == IMarker.SEVERITY_ERROR || severity == IMarker.SEVERITY_WARNING ) {
-					ProblemMarker marker = new ProblemMarker( severity == IMarker.SEVERITY_ERROR ? at.bestsolution.javafx.ide.editor.ProblemMarker.Type.ERROR : at.bestsolution.javafx.ide.editor.ProblemMarker.Type.WARNING, linenumber, startCol, endCol, description);
-					list.add(marker);
-				}
-			}
-			
-			setMarkers(list);
-		} catch (Exception e) {
+			unit.reconcile(ICompilationUnit.NO_AST, true, null, null);
+		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

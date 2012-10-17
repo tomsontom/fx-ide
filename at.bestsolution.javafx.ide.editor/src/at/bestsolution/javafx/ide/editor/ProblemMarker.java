@@ -18,21 +18,21 @@ public class ProblemMarker {
 	
 	public final Type type;
 	public final int linenumber;
-	public final int startCol;
-	public final int endCol;
+	public final int startSrcPosition;
+	public final int endSrcPosition;
 	public final String description;
 	
 	public ProblemMarker(Type type, int linenumber, int startCol, int endCol, String description) {
 		this.type = type;
 		this.linenumber = linenumber;
-		this.startCol = startCol;
-		this.endCol = endCol;
+		this.startSrcPosition = startCol;
+		this.endSrcPosition = endCol;
 		this.description = description;
 	}
 
 	@Override
 	public String toString() {
-		return "ProblemMarker [type=" + type + ", linenumber=" + linenumber + ", startCol=" + startCol + ", endCol=" + endCol + ", description=" + description + "]";
+		return "ProblemMarker [type=" + type + ", linenumber=" + linenumber + ", startCol=" + startSrcPosition + ", endCol=" + endSrcPosition + ", description=" + description + "]";
 	}
 	
 	

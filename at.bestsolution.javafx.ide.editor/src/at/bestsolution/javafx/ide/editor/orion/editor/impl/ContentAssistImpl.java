@@ -64,7 +64,7 @@ public class ContentAssistImpl implements ContentAssist {
 			
 			b.append(",\"description\":  "+description+" ");
 			if( p.type == Type.METHOD ) {
-				b.append(",\"escapePosition\": "+(offset+v.length()-1)+" ");	
+				b.append(",\"escapePosition\": "+(offset+v.length()-1 - prefix.length())+" ");
 			}
 			b.append(", \"style\": \"attributedString\"");
 			b.append(", \"replace\":  true");
