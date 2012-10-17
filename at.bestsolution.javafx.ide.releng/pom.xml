@@ -22,7 +22,11 @@
 	</properties>
 
 	<modules>
-		
+		<module>../at.bestsolution.javafx.ide.editor</module>
+		<module>../at.bestsolution.javafx.ide.services</module>
+		<module>../at.bestsolution.javafx.ide.projectexplorer</module>
+		<module>../at.bestsolution.javafx.ide.jdt</module>
+		<module>../at.bestsolution.javafx.ide.editor.app</module>
 	</modules>
 
 	<repositories>
