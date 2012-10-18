@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="JavaFX Editor" id="at.bestsolution.javafx.ide.editor.app.product" application="at.bestsolution.javafx.ide.editor.app.application" useFeatures="false" includeLaunchers="true">
+<product name="JavaFX Editor" id="at.bestsolution.javafx.ide.editor.app.product" application="at.bestsolution.javafx.ide.editor.app.application" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -11,54 +11,9 @@
       <vmArgs>-Xms40m -Xmx512m -Dosgi.framework.extensions=at.bestsolution.efxclipse.runtime.osgi</vmArgs>
    </launcherArgs>
 
-   <plugins>
-      <plugin id="at.bestsolution.efxclipse.runtime.application"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.databinding"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.di"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.dialogs"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.javafx"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.osgi" fragment="true"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.osgi.util"/>
-      <plugin id="at.bestsolution.efxclipse.runtime.panels"/>
-      <plugin id="at.bestsolution.efxclipse.tooling.jdt.core"/>
-      <plugin id="at.bestsolution.javafx.ide.editor"/>
-      <plugin id="at.bestsolution.javafx.ide.editor.app"/>
-      <plugin id="at.bestsolution.javafx.ide.jdt"/>
-      <plugin id="at.bestsolution.javafx.ide.projectexplorer"/>
-      <plugin id="at.bestsolution.javafx.ide.services"/>
-      <plugin id="com.ibm.icu.base"/>
-      <plugin id="javax.annotation"/>
-      <plugin id="javax.inject"/>
-      <plugin id="org.eclipse.core.commands"/>
-      <plugin id="org.eclipse.core.contenttype"/>
-      <plugin id="org.eclipse.core.databinding"/>
-      <plugin id="org.eclipse.core.databinding.observable"/>
-      <plugin id="org.eclipse.core.databinding.property"/>
-      <plugin id="org.eclipse.core.expressions"/>
-      <plugin id="org.eclipse.core.filesystem"/>
-      <plugin id="org.eclipse.core.jobs"/>
-      <plugin id="org.eclipse.core.resources"/>
-      <plugin id="org.eclipse.core.runtime"/>
-      <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
-      <plugin id="org.eclipse.core.variables"/>
-      <plugin id="org.eclipse.debug.core"/>
-      <plugin id="org.eclipse.e4.core.contexts"/>
-      <plugin id="org.eclipse.e4.core.di"/>
-      <plugin id="org.eclipse.equinox.app"/>
-      <plugin id="org.eclipse.equinox.common"/>
-      <plugin id="org.eclipse.equinox.ds"/>
-      <plugin id="org.eclipse.equinox.event"/>
-      <plugin id="org.eclipse.equinox.preferences"/>
-      <plugin id="org.eclipse.equinox.registry"/>
-      <plugin id="org.eclipse.equinox.util"/>
-      <plugin id="org.eclipse.jdt.core"/>
-      <plugin id="org.eclipse.jdt.debug"/>
-      <plugin id="org.eclipse.jdt.launching"/>
-      <plugin id="org.eclipse.jdt.launching.macosx"/>
-      <plugin id="org.eclipse.osgi"/>
-      <plugin id="org.eclipse.osgi.services"/>
-      <plugin id="org.eclipse.text"/>
-   </plugins>
+   <features>
+      <feature id="at.bestsolution.javafx.ide.feature" version="1.0.0.qualifier"/>
+   </features>
 
    <configurations>
       <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />

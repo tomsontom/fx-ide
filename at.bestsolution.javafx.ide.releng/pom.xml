@@ -27,6 +27,7 @@
 		<module>../at.bestsolution.javafx.ide.projectexplorer</module>
 		<module>../at.bestsolution.javafx.ide.jdt</module>
 		<module>../at.bestsolution.javafx.ide.editor.app</module>
+		<module>../at.bestsolution.javafx.ide.feature</module>
 		<module>../at.bestsolution.javafx.ide.app.product</module>
 	</modules>
 
