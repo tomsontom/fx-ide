@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="JavaFX Editor" id="at.bestsolution.javafx.ide.editor.app.product" application="at.bestsolution.javafx.ide.editor.app.application" useFeatures="true" includeLaunchers="true">
+<product name="JavaFX Editor" id="at.bestsolution.javafx.ide.editor.app.product" application="at.bestsolution.javafx.ide.editor.app.application" useFeatures="true" includeLaunchers="false">
 
    <configIni use="default">
    </configIni>
@@ -10,6 +10,9 @@
       <programArgs>-consoleLog -nosplash</programArgs>
       <vmArgs>-Xms40m -Xmx512m -Dosgi.framework.extensions=at.bestsolution.efxclipse.runtime.osgi</vmArgs>
    </launcherArgs>
+
+   <plugins>
+   </plugins>
 
    <features>
       <feature id="at.bestsolution.javafx.ide.feature" version="1.0.0.qualifier"/>
