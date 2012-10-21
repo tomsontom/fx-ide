@@ -38,6 +38,7 @@ import javax.inject.Inject;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -82,6 +83,9 @@ public class ProjectExplorer {
 						
 						private void handleChange(final IResource resource,
 								final IContainer parent, final boolean added) {
+							if( resource.isDerived()  || resource.getName().startsWith(".") ) {
+								return;
+							}
 							Platform.runLater(new Runnable() {
 								
 								@Override
@@ -128,8 +132,14 @@ public class ProjectExplorer {
 	
 	private Map<IResource, TreeItem<IResource>> map = new HashMap<IResource, TreeItem<IResource>>();
 	
+	private Image projectImage;
+	private Image packageImage;
+	private Image srcFolderImage;
+	private Image javaFileImage;
+	
 	@Inject
 	public ProjectExplorer(BorderPane container, IWorkspace workspace) {
+		initImages();
 		view = new TreeView<IResource>(new LazyTreeItem(workspace.getRoot()));
 		view.setCellFactory(new Callback<TreeView<IResource>, TreeCell<IResource>>() {
 			
@@ -145,13 +155,17 @@ public class ProjectExplorer {
 						} else {
 							setText(item.getName());
 							if( item instanceof IProject ) {
-								try(InputStream in = getClass().getClassLoader().getResourceAsStream("/icons/16_16/prj_obj.gif")) {
-									setGraphic(new ImageView(new Image(in)));
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+								setGraphic(new ImageView(projectImage));
+							} else if( item instanceof IFolder ) {
+								if( "src".equals(item.getName()) ) {
+									setGraphic(new ImageView(srcFolderImage));	
+								} else {
+									setGraphic(new ImageView(packageImage));
 								}
-								
+							} else if( item instanceof IFile ) {
+								if( item.getName().endsWith(".java") ) {
+									setGraphic(new ImageView(javaFileImage));
+								}
 							}
 						}
 					}
@@ -250,6 +264,9 @@ public class ProjectExplorer {
 					IResource[] resources = c.members();
 					List<LazyTreeItem> children = new ArrayList<LazyTreeItem>(resources.length);
 					for( IResource r : resources ) {
+						if( r.isDerived() || r.getName().startsWith(".") ) {
+							continue;
+						}
 						children.add(new LazyTreeItem(r));
 					}
 //FIXME
@@ -273,5 +290,35 @@ public class ProjectExplorer {
 		}
 		
 		return null;
+	}
+	
+	private void initImages() {
+		try(InputStream in = getClass().getClassLoader().getResourceAsStream("/icons/16_16/prj_obj.gif")) {
+			projectImage = new Image(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try(InputStream in = getClass().getClassLoader().getResourceAsStream("/icons/16_16/package_obj.gif")) {
+			packageImage = new Image(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try(InputStream in = getClass().getClassLoader().getResourceAsStream("/icons/16_16/packagefolder_obj.gif")) {
+			srcFolderImage = new Image(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try(InputStream in = getClass().getClassLoader().getResourceAsStream("/icons/16_16/jcu_obj.gif")) {
+			javaFileImage = new Image(in);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
