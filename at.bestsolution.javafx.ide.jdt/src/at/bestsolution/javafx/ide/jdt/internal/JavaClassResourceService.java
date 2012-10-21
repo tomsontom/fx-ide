@@ -291,9 +291,10 @@ public class JavaClassResourceService implements IResourceService {
 			workingCopy.setAttribute(
 					IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, jre
 							.getVMInstallType().getId());
+			
+			ICompilationUnit unit = (ICompilationUnit) JavaCore.create(f);
 			workingCopy.setAttribute(
-					IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, f
-							.getFullPath().removeFileExtension().lastSegment());
+					IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, unit.findPrimaryType().getFullyQualifiedName());
 
 			IJavaProject jp = JavaCore.create(resource.getProject());
 
