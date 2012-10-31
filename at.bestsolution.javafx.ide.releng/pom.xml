@@ -41,8 +41,8 @@
 		<repository>
 			<id>efxclipse-nightly-repo</id>
 			<layout>p2</layout>
-			<!--  url>file:///Users/tomschindl/git/e-fx-clipse/at.bestsolution.efxclipse.tooling.updatesite/target/site</url-->
-			<url>http://www.efxclipse.org/p2-repos/nightly/site/</url>
+			<url>file:///Users/tomschindl/git/e-fx-clipse/at.bestsolution.efxclipse.tooling.updatesite/target/site</url>
+			<!--  >url>http://www.efxclipse.org/p2-repos/nightly/site/</url -->
 		</repository>
 	</repositories>
 
