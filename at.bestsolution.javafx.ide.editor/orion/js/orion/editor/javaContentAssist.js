@@ -5,9 +5,7 @@ define("orion/editor/javaContentAssist", [], function() {
 	{
 		computeProposals: function(buffer, offset, context) {
 			var jProps = this.__javaObject.getProposals(context.line, context.prefix, offset);
-			var proposals = JSON.parse(jProps);
-			// proposals.push( { proposal : "err", description: jProps + " - err - Error Stream" } );
-			
+			var proposals = JSON.parse(jProps);			
 			return proposals;
 		}
 	}
