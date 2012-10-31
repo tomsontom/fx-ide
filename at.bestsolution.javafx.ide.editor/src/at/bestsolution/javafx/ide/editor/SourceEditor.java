@@ -10,9 +10,20 @@
  *******************************************************************************/
 package at.bestsolution.javafx.ide.editor;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.osgi.service.urlconversion.URLConverter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -83,14 +94,28 @@ public class SourceEditor extends BorderPane {
 			}
 		});
 		
-		engine.load("file:///Users/tomschindl/git/fx-ide/at.bestsolution.javafx.ide.editor/orion/html/editor.html");
-		engine.setOnAlert(new EventHandler<WebEvent<String>>() {
+		try {
+			Bundle b = FrameworkUtil.getBundle(getClass());
+			URL rootEntry = b.getEntry("/");
+			URLConverter converter = getURLConverter(b.getBundleContext(), rootEntry);
+			rootEntry = converter.resolve(rootEntry);
 			
-			@Override
-			public void handle(WebEvent<String> event) {
-				System.err.println("This is an alert: " + event);
-			}
-		});
+			File installLocation = new File(rootEntry.getPath());
+			File html = new File(installLocation, "orion/html/editor.html");
+			engine.load(html.toURL().toString());
+			engine.setOnAlert(new EventHandler<WebEvent<String>>() {
+				
+				@Override
+				public void handle(WebEvent<String> event) {
+					System.err.println("This is an alert: " + event);
+				}
+			});
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		setCenter(webView);
 	}
 	
@@ -98,6 +123,24 @@ public class SourceEditor extends BorderPane {
 //		System.err.println(o);
 //	}
 
+	private static URLConverter getURLConverter(BundleContext context, URL url) {
+		String protocol = url.getProtocol();
+		String FILTER_PREFIX = "(&(objectClass=" + URLConverter.class.getName() + ")(protocol="; //$NON-NLS-1$ //$NON-NLS-2$
+		String FILTER_POSTFIX = "))"; //$NON-NLS-1$
+		try {
+			Collection<ServiceReference<URLConverter>> refs;
+			refs = context.getServiceReferences(URLConverter.class, FILTER_PREFIX + protocol + FILTER_POSTFIX);
+			if (!refs.isEmpty()) {
+				return context.getService(refs.iterator().next());
+			}
+		} catch (InvalidSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
 	public void setProblemMarkers(List<ProblemMarker> markers) {
 		this.markers.clear();
 		this.markers.addAll(markers);
