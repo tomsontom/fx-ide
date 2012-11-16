@@ -52,15 +52,16 @@ public class ContentAssistImpl implements ContentAssist {
 //				description = toHTML(p.description);
 //			}
 			
+			description = "{";
 			if( p.type == Type.TYPE ) {
-				description = "{ \"styleClass\": \"content-item class-item\",  \"segments\": " + toJSON(p.description) + "}";
+				description += " \"icon\":  { \"src\":\"../js/editor/textview/class_obj.gif\"  }, ";
 			} else if(p.type == Type.METHOD) {
-				description = "{ \"styleClass\": \"content-item method-item\",  \"segments\": " + toJSON(p.description) + "}";
-			} else if(p.type == Type.METHOD) {
-				description = "{ \"styleClass\": \"content-item field-item\",  \"segments\": " + toJSON(p.description) + "}";
-			} else {
-				description = "{ \"segments\": " + toJSON(p.description) + "}";
+				description += " \"icon\":  { \"src\":\"../js/editor/textview/methpub_obj.gif\"  }, ";
+			} else if(p.type == Type.FIELD) {
+				description += " \"icon\":  { \"src\":\"../js/editor/textview/field_public_obj.gif\"  }, ";
 			}
+			
+			description += "\"segments\": " + toJSON(p.description) + "}";
 			
 			b.append(",\"description\":  "+description+" ");
 			if( p.type == Type.METHOD ) {
@@ -96,7 +97,7 @@ public class ContentAssistImpl implements ContentAssist {
 					b.append(", \"color\":\"" + segment.style.color + "\"");
 				}
 				if(segment.style.fontname != null) {
-					b.append(", \"fontname\":\"" + segment.style.fontname + "\"");
+					b.append(", \"fontName\":\"" + segment.style.fontname + "\"");
 				}
 				b.append("");
 				b.append("}");

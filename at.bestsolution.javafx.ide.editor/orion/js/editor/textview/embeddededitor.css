@@ -45,21 +45,3 @@ a:hover {
 .textviewContainer {
 	font: 14px Monaco;
 }
-
-.content-item {
-	padding-left: 20px;
-	background-position: left center;
-	background-repeat: no-repeat;
-}
-
-.class-item {
-	background-image: url("class_obj.gif");
-}
-
-.method-item {
-	background-image: url("methpub_obj.gif");
-}
-
-.field-item {
-	background-image: url("field_public_obj.gif");
-}
