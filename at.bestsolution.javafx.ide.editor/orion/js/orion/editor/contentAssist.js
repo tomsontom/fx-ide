@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred'], function(messages, mKeyBinding, mEventTarget, Deferred) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -113,8 +113,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				}
 			}
 		};
-		var isMac = navigator.platform.indexOf("Mac") !== -1;
-		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
+		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
 		textView.setAction("contentAssist", function() {
 			self.activate();
 			return true;
@@ -353,13 +352,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 */
 	function ContentAssistWidget(contentAssist, parentNode) {
 		this.contentAssist = contentAssist;
-		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
 		this.isShowing = false;
-		var self = this;
+		var document = this.textView.getOptions("parent").ownerDocument;
+		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		if (!this.parentNode) {
-			this.parentNode = document.createElement("div");
+			this.parentNode = util.createElement(document, "div");
 			this.parentNode.className = "contentassist";
 			var body = document.getElementsByTagName("body")[0];
 			if (body) {
@@ -368,6 +367,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				throw new Error("parentNode is required");
 			}
 		}
+		var self = this;
 		this.textViewListener = {
 			onMouseDown: function(event) {
 				if (event.event.target.parentElement !== self.parentNode) {
@@ -409,12 +409,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		/** @private */
 		createDiv: function(proposal, isSelected, parent, itemIndex) {
-			var div = document.createElement("div");
+			var document = parent.ownerDocument;
+			var div = util.createElement(document, "div");
 			div.id = "contentoption" + itemIndex;
 			div.setAttribute("role", "option");
 			var node;
 			if (proposal.style === "hr") {
-				node = document.createElement("hr");
+				node = util.createElement(document, "hr");
 				div.appendChild(node, div);
 			} else if( proposal.style === "attributedString" ) {
 				div.className = this.calculateClasses(proposal.style, isSelected);
@@ -422,8 +423,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 					this.parentNode.setAttribute("aria-activedescendant", div.id);
 				}
 				
-				var contentDiv = document.createElement("div");
-				var nobr = document.createElement("nobr");
+				var contentDiv = util.createElement(document, "div");
+				var nobr = util.createElement(document, "nobr");
 				contentDiv.appendChild(nobr);
 				var contentNode = nobr;
 				if( proposal.description ) {
@@ -431,9 +432,15 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 						contentDiv.className = proposal.description.styleClass;
 					}
 					
+					if( proposal.description.icon ) {
+						var iconNode = util.createElement(document, "img");
+						iconNode.src = proposal.description.icon.src;
+						contentNode.appendChild(iconNode);
+					}
+					
 					if( proposal.description.segments ) {
-						proposal.description.segments.forEach( function(segment) {
-							var itemNode = document.createElement("span");
+					    proposal.description.segments.forEach( function(segment) {
+							var itemNode = util.createElement(document, "span");
 							var styleString = "";
 							
 							if( segment.style ) {
@@ -445,6 +452,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 									itemNode.style.color = segment.style.color;
 								} else if(segment.style.fontname != null) {
 									itemNode.style.fontName = segment.style.fontname;
+								} else if(segment.style.backgroundColor != null) {
+									itemNode.style.backgroundColor = segment.style.backgroundcolor;
 								}
 							}
 							itemNode.appendChild(document.createTextNode(segment.value));
@@ -456,13 +465,6 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				}
 				
 				div.appendChild(contentDiv);
-			} else if( proposal.style === "html" ) {
-				div.className = this.calculateClasses(proposal.style, isSelected);
-				if (isSelected) {
-					this.parentNode.setAttribute("aria-activedescendant", div.id);
-				}
-				
-				div.innerHTML = this.getDisplayString(proposal);
 			} else {
 				div.className = this.calculateClasses(proposal.style, isSelected);
 				node = document.createTextNode(this.getDisplayString(proposal));
@@ -567,7 +569,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.isShowing = true;
 		},
 		hide: function() {
-			if(document.activeElement === this.parentNode) {
+			if(this.parentNode.ownerDocument.activeElement === this.parentNode) {
 				this.textView.focus();
 			}
 			this.parentNode.style.display = "none";
@@ -585,6 +587,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.parentNode.scrollTop = 0;
 
 			// Make sure that the panel is never outside the viewport
+			var document = this.parentNode.ownerDocument;
 			var viewportWidth = document.documentElement.clientWidth,
 			    viewportHeight =  document.documentElement.clientHeight;
 			if (caretLocation.y + this.parentNode.offsetHeight > viewportHeight) {

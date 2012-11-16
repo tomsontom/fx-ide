@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,10 +11,9 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
-/*global define window*/
+/*global define*/
 
-define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEventTarget) { //$NON-NLS-1$ //$NON-NLS-0$
-	var isWindows = window.navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
+define("orion/textview/textModel", ['orion/textview/eventTarget', 'orion/textview/util'], function(mEventTarget, util) { //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * Constructs a new TextModel with the given text and default line delimiter.
@@ -438,7 +437,7 @@ define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEve
 					lineDelimiter = this.getText(this.getLineEnd(0), this.getLineEnd(0, true));
 				}
 			}
-			this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._lineDelimiter = lineDelimiter ? lineDelimiter : util.platformDelimiter;
 			if (all) {
 				var lineCount = this.getLineCount();
 				if (lineCount > 1) {

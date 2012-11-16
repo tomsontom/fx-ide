@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
- /*global define window */
+ /*global define*/
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/i18nUtil'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, i18nUtil) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
@@ -70,7 +70,16 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
-		
+		/**
+		 * Destroys the editor.
+		 */
+		destroy: function() {
+			this.uninstallTextView();
+			this._textViewFactory = this._undoStackFactory = this._textDNDFactory = 
+			this._annotationFactory = this._foldingRulerFactory = this._lineNumberRulerFactory = 
+			this._contentAssistFactory = this._keyBindingFactory = this._statusReporter =
+			this._domNode = null;
+		},
 		/**
 		 * Returns the annotation model of the editor. 
 		 *
@@ -392,8 +401,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		reportStatus: function(message, type, isAccessible) {
 			if (this._statusReporter) {
 				this._statusReporter(message, type, isAccessible);
-			} else {
-				window.alert(type === "error" ? "ERROR: " + message : message); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
@@ -675,6 +682,29 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			this.dispatchEvent(textViewInstalledEvent);
 		},
 		
+		/**
+		 * Destroys the underlying TextView.
+		 */
+		uninstallTextView: function() {
+			var textView = this._textView;
+			if (!textView) { return; }
+			
+			textView.destroy();
+			
+			this._textView = this._undoStack = this._textDND = this._contentAssist = 
+				this._listener = this._annotationModel = this._annotationStyler =
+				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
+				this._foldingRuler = this._currentLineAnnotation = this._title = null;
+			this._dirty = false;
+			this._keyModes = [];
+			
+			var textViewUninstalledEvent = {
+				type: "TextViewUninstalled", //$NON-NLS-0$
+				textView: textView
+			};
+			this.dispatchEvent(textViewUninstalledEvent);
+		},
+		
 		_updateCursorStatus: function() {
 			var model = this.getModel();
 			var caretOffset = this.getCaretOffset();
@@ -688,7 +718,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					return;
 				}
 			}
-			this.reportStatus(i18nUtil.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1));
+			this.reportStatus(util.formatMessage(messages.lineColumn, lineIndex + 1, offsetInLine + 1));
 		},
 		
 		showProblems: function(problems) {
