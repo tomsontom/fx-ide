@@ -1,7 +1,5 @@
 package at.bestsolution.javafx.ide.editor.orion.editor.impl;
 
-import java.util.List;
-
 import netscape.javascript.JSObject;
 import at.bestsolution.javafx.ide.editor.ContentProposalComputer;
 import at.bestsolution.javafx.ide.editor.ContentProposalComputer.Proposal;
@@ -33,25 +31,12 @@ public class ContentAssistImpl implements ContentAssist {
 				b.append(",\n");
 			}
 			String v = p.value;
-//			if( prefix.length() > 0 ) {
-//				v = v.substring(prefix.length());
-//			}
 			
 			b.append("	{ ");
 			b.append("\"proposal\": \""+v+"\" ");
 			
 			String description = "";
-			
-//			if( p.type == Type.TYPE ) {
-//				description = "<div class='content-item class-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
-//			} else if(p.type == Type.METHOD) {
-//				description = "<div class='content-item method-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
-//			} else if(p.type == Type.METHOD) {
-//				description = "<div class='content-item field-item'><nobr>" + toHTML(p.description) + "</nobr></div>";
-//			} else {
-//				description = toHTML(p.description);
-//			}
-			
+						
 			description = "{";
 			if( p.type == Type.TYPE ) {
 				description += " \"icon\":  { \"src\":\"../js/editor/textview/class_obj.gif\"  }, ";
@@ -75,7 +60,6 @@ public class ContentAssistImpl implements ContentAssist {
 		}
 		b.append("]");
 		
-		System.err.println(b.toString()); 
 		return b.toString();
 	}
 
@@ -106,36 +90,6 @@ public class ContentAssistImpl implements ContentAssist {
 			flag = true;
 		}
 		b.append("]");
-		return b.toString();
-	}
-	
-	private static String toHTML(StyledString s) {
-		StringBuilder b = new StringBuilder();
-		b.append("<span>");
-		for( Segment segment : s.getList() ) {
-			if( segment.style == null ) {
-				b.append(segment.value);
-			} else {
-				String styleString = "";
-				if( segment.style.bold ) {
-					styleString += "font-weight: bold;";
-				}
-				
-				if(segment.style.italic) {
-					styleString += "font-style: italic;";
-				}
-				
-				if(segment.style.color != null) {
-					styleString += "color: " + segment.style.color + ";";
-				}
-				
-				if(segment.style.fontname != null) {
-					styleString += "font-name: " + segment.style.fontname + ";";
-				}
-				b.append("<span style='"+styleString+"'>"+segment.value+"</span>");
-			}
-		}
-		b.append("</span>");
 		return b.toString();
 	}
 }
