@@ -92,7 +92,7 @@ public class IDEAppLauncher implements IWorkbench {
 		
 		p.setCenter(split);
 		
-		primaryStage.setScene(new Scene(p,800,600));
+		primaryStage.setScene(new Scene(p,1024,768));
 		primaryStage.setTitle("Bestsolution.at - JavaFX IDE");
 		primaryStage.show();
 	}
