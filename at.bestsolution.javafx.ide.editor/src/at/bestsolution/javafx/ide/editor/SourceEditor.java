@@ -51,6 +51,49 @@ public class SourceEditor extends BorderPane {
 	private ContentProposalComputer computer;
 	private List<ProblemMarker> markers = new ArrayList<ProblemMarker>();
 	
+	public class LoadEditorCallback implements JavaScriptNCICallback<JSObject> {
+		private WebEngine engine;
+
+		public LoadEditorCallback(WebEngine engine) {
+			this.engine = engine;
+		}
+		
+		@Override
+		public void initJava(JSObject jsObject) {
+			EditorImpl e = new EditorImpl(engine, jsObject); 
+			initEditor(e);
+		}
+	}
+	
+	public class LoadContentAssisCallback implements JavaScriptNCICallback<JSObject> {
+
+		@Override
+		public void initJava(JSObject jsObject) {
+			ContentProposalComputer delegate = new ContentProposalComputer() {
+				
+				@Override
+				public List<Proposal> computeProposals(String line, String prefix,
+						int offset) {
+					if( computer != null ) { 
+						return computer.computeProposals(line, prefix, offset); 
+					} else { 
+						return Collections.emptyList(); 
+					}
+				}
+			};
+			new ContentAssistImpl(delegate, jsObject);
+		}
+	}
+	
+	public class SaveRunnable implements Runnable {
+		@Override
+		public void run() {
+			if( runnable != null ) {
+				runnable.run();
+			}
+		}
+	}
+	
 	public SourceEditor() {
 		this.webView = new WebView();
 		this.webView.setFontSmoothingType(FontSmoothingType.LCD);
@@ -63,33 +106,8 @@ public class SourceEditor extends BorderPane {
 					State oldValue, State newValue) {
 				if (newValue == State.SUCCEEDED) {
 					JSObject win = (JSObject) engine.executeScript("window");
-					win.setMember("javaEditor", new JavaScriptNCICallback<JSObject>() {
-
-						@Override
-						public void initJava(JSObject jsObject) {
-							EditorImpl e = new EditorImpl(engine, jsObject); 
-							initEditor(e);
-						}
-					}); 
-					win.setMember("javaContentAssist", new JavaScriptNCICallback<JSObject>() {
-
-						@Override
-						public void initJava(JSObject jsObject) {
-							ContentProposalComputer delegate = new ContentProposalComputer() {
-								
-								@Override
-								public List<Proposal> computeProposals(String line, String prefix,
-										int offset) {
-									if( computer != null ) { 
-										return computer.computeProposals(line, prefix, offset); 
-									} else { 
-										return Collections.emptyList(); 
-									}
-								}
-							};
-							new ContentAssistImpl(delegate, jsObject);
-						}
-					});
+					win.setMember("javaEditor", new LoadEditorCallback(engine));
+					win.setMember("javaContentAssist", new LoadContentAssisCallback());
 				}
 			}
 		});
@@ -171,15 +189,7 @@ public class SourceEditor extends BorderPane {
 			}
 		});
 		
-		this.editor.setAction("Save", new Runnable() {
-			
-			@Override
-			public void run() {
-				if( runnable != null ) {
-					runnable.run();
-				}
-			}
-		});
+		this.editor.setAction("Save", new SaveRunnable());
 		if( !this.markers.isEmpty() ) {
 			this.editor.showProblems(markers);
 		}

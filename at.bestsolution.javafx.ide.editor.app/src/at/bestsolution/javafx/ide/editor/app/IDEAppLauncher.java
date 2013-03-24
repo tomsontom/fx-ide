@@ -34,6 +34,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -216,30 +217,7 @@ public class IDEAppLauncher implements IWorkbench {
 	}
 	
 	void handleNewProject(final IProjectService service) {
-		Dialog d = new Dialog(stage,"New Project") {
-			
-			private TextField txt;
-
-			@Override
-			protected Node createDialogArea() {
-				HBox box = new HBox(10);
-				box.getChildren().add(new Label("Projectname:"));
-				
-				txt = new TextField();
-				HBox.setHgrow(txt, Priority.ALWAYS);
-				box.getChildren().add(txt);
-				
-				return box;
-			}
-			
-			@Override
-			protected void okPressed() {
-				if( txt.getText() != null && ! txt.getText().trim().isEmpty() ) {
-					service.createProject(ResourcesPlugin.getWorkspace(), new NullProgressMonitor(), txt.getText().trim());
-					super.okPressed();
-				}
-			}
-		};
+		Dialog d = new NewProjectDialog(stage,"New Project", service);
 		d.open();
 	}
 	
@@ -285,5 +263,37 @@ public class IDEAppLauncher implements IWorkbench {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+	}
+	
+	class NewProjectDialog extends Dialog {
+
+		private TextField txt;
+
+		private final IProjectService service;
+		
+		public NewProjectDialog(Window parent, String title, IProjectService service) {
+			super(parent, title);
+			this.service = service;
+		}
+
+		@Override
+		protected Node createDialogArea() {
+			HBox box = new HBox(10);
+			box.getChildren().add(new Label("Projectname:"));
+			
+			txt = new TextField();
+			HBox.setHgrow(txt, Priority.ALWAYS);
+			box.getChildren().add(txt);
+			
+			return box;
+		}
+		
+		@Override
+		protected void okPressed() {
+			if( txt.getText() != null && ! txt.getText().trim().isEmpty() ) {
+				service.createProject(ResourcesPlugin.getWorkspace(), new NullProgressMonitor(), txt.getText().trim());
+				super.okPressed();
+			}
+		}
 	}
 }

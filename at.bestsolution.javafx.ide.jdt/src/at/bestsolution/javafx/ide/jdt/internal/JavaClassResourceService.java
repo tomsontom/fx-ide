@@ -13,6 +13,7 @@ package at.bestsolution.javafx.ide.jdt.internal;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -65,6 +67,54 @@ import at.bestsolution.efxclipse.runtime.dialogs.TitleAreaDialog;
 import at.bestsolution.javafx.ide.services.IResourceService;
 
 public class JavaClassResourceService implements IResourceService {
+	final class JavaClassDialog extends TitleAreaDialog {
+		private final IContainer container;
+		private TextField packageName;
+		private TextField className;
+
+		JavaClassDialog(Window parent, String windowTitle, String title,
+				String message, URL imageURI, IContainer container) {
+			super(parent, windowTitle, title, message, imageURI);
+			this.container = container;
+		}
+
+		@Override
+		protected Node createDialogContent() {
+			GridPane pane = new GridPane();
+			pane.setHgap(10);
+			pane.setVgap(5);
+
+			{
+				Label l = new Label("Package:");
+				pane.add(l, 0, 0);
+
+				packageName = new TextField();
+				pane.add(packageName, 1, 0);
+				GridPane.setHgrow(packageName, Priority.ALWAYS);
+			}
+
+			{
+				Label l = new Label("Name:");
+				pane.add(l, 0, 1);
+
+				className = new TextField();
+				pane.add(className, 1, 1);
+				GridPane.setHgrow(className, Priority.ALWAYS);
+			}
+
+			return pane;
+		}
+
+		@Override
+		protected void okPressed() {
+			resource = handleElementCreation(container,
+					packageName.getText(), className.getText());
+			if (resource != null) {
+				super.okPressed();
+			}
+		}
+	}
+
 	private IResource resource;
 
 	@Override
@@ -81,49 +131,8 @@ public class JavaClassResourceService implements IResourceService {
 	public IResource create(final IContainer container, Stage parent) {
 		resource = null;
 		
-		TitleAreaDialog dialog = new TitleAreaDialog(parent, "New Class", "New Class",
-				"Create a new Java Class", getClass().getClassLoader()
-						.getResource("/icons/wizban/newclass_wiz.png")) {
-
-			private TextField packageName;
-			private TextField className;
-
-			@Override
-			protected Node createDialogContent() {
-				GridPane pane = new GridPane();
-				pane.setHgap(10);
-				pane.setVgap(5);
-
-				{
-					Label l = new Label("Package:");
-					pane.add(l, 0, 0);
-
-					packageName = new TextField();
-					pane.add(packageName, 1, 0);
-					GridPane.setHgrow(packageName, Priority.ALWAYS);
-				}
-
-				{
-					Label l = new Label("Name:");
-					pane.add(l, 0, 1);
-
-					className = new TextField();
-					pane.add(className, 1, 1);
-					GridPane.setHgrow(className, Priority.ALWAYS);
-				}
-
-				return pane;
-			}
-
-			@Override
-			protected void okPressed() {
-				resource = handleElementCreation(container,
-						packageName.getText(), className.getText());
-				if (resource != null) {
-					super.okPressed();
-				}
-			}
-		};
+		TitleAreaDialog dialog = new JavaClassDialog(parent, "New Class", "New Class", "Create a new Java Class", getClass().getClassLoader()
+				.getResource("/icons/wizban/newclass_wiz.png"), container);
 
 		dialog.open();
 
