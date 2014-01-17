@@ -16,43 +16,37 @@
       [Enter License Description here.]
    </license>
 
+
    <plugin
-         id="at.bestsolution.efxclipse.runtime.application"
+         id="org.eclipse.fx.ui.databinding"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.databinding"
+         id="org.eclipse.fx.ui.di"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.di"
+         id="org.eclipse.fx.ui.dialogs"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.dialogs"
+         id="org.eclipse.fx.javafx"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.javafx"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="at.bestsolution.efxclipse.runtime.osgi"
+         id="org.eclipse.fx.osgi"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -60,21 +54,21 @@
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.osgi.util"
+         id="org.eclipse.fx.osgi.util"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.runtime.panels"
+         id="org.eclipse.fx.ui.panes"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="at.bestsolution.efxclipse.tooling.jdt.core"
+         id="org.eclipse.fx.ide.jdt.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -113,6 +107,7 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
 
    <plugin
          id="com.ibm.icu.base"

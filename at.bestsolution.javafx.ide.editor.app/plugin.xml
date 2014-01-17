@@ -8,7 +8,7 @@
       <application
             thread="main">
          <run
-               class="at.bestsolution.efxclipse.runtime.di.DIApplication">
+               class="org.eclipse.fx.ui.di.DIApplication">
             <parameter name="mainClass" value="at.bestsolution.javafx.ide.editor.app.IDEAppLauncher" />
          </run>
       </application>

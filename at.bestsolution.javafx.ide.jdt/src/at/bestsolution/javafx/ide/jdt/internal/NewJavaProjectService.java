@@ -29,12 +29,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.fx.ide.jdt.core.JavaFXCore;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import at.bestsolution.efxclipse.tooling.jdt.core.JavaFXCore;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathSupport;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.BuildPathsBlock;
 import at.bestsolution.javafx.ide.jdt.internal.jdt.CPListElement;

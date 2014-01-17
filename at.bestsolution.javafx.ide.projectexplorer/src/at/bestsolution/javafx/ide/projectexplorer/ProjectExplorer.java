@@ -270,9 +270,9 @@ public class ProjectExplorer {
 						children.add(new LazyTreeItem(r));
 					}
 //FIXME
-//					for( TreeItem<IResource> t : super.getChildren() ) {
-//						map.remove(t.getValue());
-//					}
+					for( TreeItem<IResource> t : super.getChildren() ) {
+						map.remove(t.getValue());
+					}
 					super.getChildren().setAll(children);
 				} catch (CoreException e) {
 					// TODO Auto-generated catch block

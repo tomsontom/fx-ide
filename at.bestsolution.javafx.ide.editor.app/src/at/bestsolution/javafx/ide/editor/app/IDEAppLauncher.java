@@ -48,13 +48,13 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.fx.ui.dialogs.Dialog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import at.bestsolution.efxclipse.runtime.dialogs.Dialog;
 import at.bestsolution.javafx.ide.projectexplorer.ProjectExplorer;
 import at.bestsolution.javafx.ide.services.FileInput;
 import at.bestsolution.javafx.ide.services.IEditorInput;
@@ -69,8 +69,14 @@ public class IDEAppLauncher implements IWorkbench {
 	private TabPane editorArea;
 	private Stage stage;
 	
+	
 	@Inject
 	IEclipseContext rootContext;
+	
+	@Inject
+	public IDEAppLauncher() {
+		
+	}
 	
 	void initContext() {
 		rootContext.set(IWorkspace.class, ResourcesPlugin.getWorkspace());
@@ -78,7 +84,7 @@ public class IDEAppLauncher implements IWorkbench {
 	}
 	
 	@PostConstruct
-	void run(Stage primaryStage) {
+	public void run(Stage primaryStage) {
 		initContext();
 		
 		stage = primaryStage;
